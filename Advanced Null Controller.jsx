@@ -1,3 +1,8 @@
+// Advanced Null Controller
+// Version: 2024.03.21
+// Author: 烟囱
+// Repository: https://github.com/Tyc-github/Advanced-Null-Controller
+
 // 创建主面板
 var win = new Window("dialog", "Advanced Null Controller by 烟囱");
 win.orientation = "column";
