@@ -28,14 +28,4 @@ jobs:
           files: Advanced Null Controller.jsx
           draft: false
           prerelease: false
-          generate_release_notes: true
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Advanced Null Controller.jsx
-          asset_name: Advanced-Null-Controller.jsx
-          asset_content_type: application/javascript 
+          generate_release_notes: true 
