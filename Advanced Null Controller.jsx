@@ -34,8 +34,12 @@ var cancelBtn = btnGroup.add("button", [0, 0, 80, 30], "取消", {name: "cancel"
 cancelBtn.helpTip = "左键点击执行\n右键点击切换模式";
 var isClearMode = false;
 
+// 创建帮助按钮
+var helpBtn = btnGroup.add("button", [0, 0, 30, 30], "?", {name: "help"}); // 小圆形按钮
+helpBtn.helpTip = "点击访问项目主页\n获取使用说明和更新";
+
 // 统一按钮文字颜色为白色
-mainBtn.textPen = cancelBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+mainBtn.textPen = cancelBtn.textPen = helpBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
 
 // 添加主按钮右键菜单事件
 mainBtn.addEventListener('mousedown', function(e) {
@@ -54,6 +58,16 @@ cancelBtn.addEventListener('mousedown', function(e) {
         e.preventDefault();
     }
 });
+
+// 添加帮助按钮点击事件
+helpBtn.onClick = function() {
+    try {
+        // 尝试打开项目链接
+        system.callSystem('cmd.exe /c start "" "https://github.com/Tyc-github/Advanced-Null-Controller"');
+    } catch(err) {
+        alert("无法打开链接，请手动访问：\nhttps://github.com/Tyc-github/Advanced-Null-Controller");
+    }
+}
 
 // 计算所选图层的中心位置
 function calculateCenterPosition(layers) {
