@@ -61,6 +61,10 @@ function createNullObject(comp, name, size, position, insertLayer) {
         nullLayer.property("Position").setValue(position);
     }
     nullLayer.anchorPoint.setValue([size / 2, size / 2]);
+    
+    // 设置不透明度为100
+    nullLayer.opacity.setValue(100);
+    
     return nullLayer;
 }
 
