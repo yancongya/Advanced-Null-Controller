@@ -1,4 +1,17 @@
-# 空对象控制器 by 烟囱
+# Advanced Null Controller by 烟囱
+
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![After Effects](https://img.shields.io/badge/After%20Effects-CS6%2B-9999FF)
+
+</div>
+
+## 📦 项目信息
+- **项目名称**：Advanced-Null-Controller
+- **仓库地址**：https://github.com/chimera-yang/Advanced-Null-Controller
+- **问题反馈**：[Issues](https://github.com/chimera-yang/Advanced-Null-Controller/issues)
 
 ## ✨ 功能特点
 

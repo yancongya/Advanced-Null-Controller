@@ -1,5 +1,5 @@
 // 创建主面板
-var win = new Window("dialog", "空对象控制器 by 烟囱");
+var win = new Window("dialog", "Advanced Null Controller by 烟囱");
 win.orientation = "column";
 win.alignChildren = "fill";
 
