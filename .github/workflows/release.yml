@@ -19,15 +19,13 @@ jobs:
           echo "version=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: Release v${{ steps.get_version.outputs.version }}
-          files: |
-            Advanced Null Controller.jsx
+          files: Advanced Null Controller.jsx
           draft: false
           prerelease: false
           generate_release_notes: true
