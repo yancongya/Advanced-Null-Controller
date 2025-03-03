@@ -10,8 +10,8 @@
 
 ## 📦 项目信息
 - **项目名称**：Advanced-Null-Controller
-- **仓库地址**：https://github.com/chimera-yang/Advanced-Null-Controller
-- **问题反馈**：[Issues](https://github.com/chimera-yang/Advanced-Null-Controller/issues)
+- **仓库地址**：https://github.com/Tyc-github/Advanced-Null-Controller
+- **问题反馈**：[Issues](https://github.com/Tyc-github/Advanced-Null-Controller/issues)
 
 ## ✨ 功能特点
 

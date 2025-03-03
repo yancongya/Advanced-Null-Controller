@@ -10,10 +10,13 @@ optionsGroup.alignChildren = "left";
 optionsGroup.margins = 20;
 optionsGroup.spacing = 20;  // 添加间距
 
-// 添加复选框
+// 添加复选框，默认全部勾选
 var rotateCheck = optionsGroup.add("checkbox", undefined, "旋转");
 var scaleCheck = optionsGroup.add("checkbox", undefined, "缩放");
 var opacityCheck = optionsGroup.add("checkbox", undefined, "不透明度");
+rotateCheck.value = true;
+scaleCheck.value = true;
+opacityCheck.value = true;
 
 // 创建按钮组
 var btnGroup = win.add("group");
