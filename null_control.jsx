@@ -19,23 +19,38 @@ var opacityCheck = optionsGroup.add("checkbox", undefined, "不透明度");
 var btnGroup = win.add("group");
 btnGroup.orientation = "row";
 btnGroup.alignment = "center";
+btnGroup.spacing = 10; // 添加按钮间距
 
-// 创建可切换的按钮
-var mainBtn = btnGroup.add("button", undefined, "开搞", {name: "ok"});
-mainBtn.helpTip = "左键点击执行\n右键点击切换模式";  // 添加提示
-var isExpressionMode = false;  // 跟踪按钮状态
+// 创建可切换的主按钮
+var mainBtn = btnGroup.add("button", [0, 0, 80, 30], "开搞", {name: "ok"}); // 设置固定大小
+mainBtn.helpTip = "左键点击执行\n右键点击切换模式";
+var isExpressionMode = false;
 
-// 添加右键菜单事件
+// 创建可切换的取消按钮
+var cancelBtn = btnGroup.add("button", [0, 0, 80, 30], "取消", {name: "cancel"}); // 设置相同大小
+cancelBtn.helpTip = "左键点击执行\n右键点击切换模式";
+var isClearMode = false;
+
+// 统一按钮文字颜色为白色
+mainBtn.textPen = cancelBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+
+// 添加主按钮右键菜单事件
 mainBtn.addEventListener('mousedown', function(e) {
     if (e.button == 2) {  // 右键点击
         isExpressionMode = !isExpressionMode;
         mainBtn.text = isExpressionMode ? "仅表达式" : "开搞";
-        e.preventDefault();  // 阻止默认右键菜单
+        e.preventDefault();
     }
 });
 
-var clearBtn = btnGroup.add("button", undefined, "清除", {name: "clear"});
-var cancelBtn = btnGroup.add("button", undefined, "取消", {name: "cancel"});
+// 添加取消按钮右键菜单事件
+cancelBtn.addEventListener('mousedown', function(e) {
+    if (e.button == 2) {  // 右键点击
+        isClearMode = !isClearMode;
+        cancelBtn.text = isClearMode ? "清除" : "取消";
+        e.preventDefault();
+    }
+});
 
 // 计算所选图层的中心位置
 function calculateCenterPosition(layers) {
@@ -319,6 +334,13 @@ mainBtn.onClick = function() {
         addExpressionsOnly();
     } else {
         createNullControl();
+    }
+    win.close();
+}
+
+cancelBtn.onClick = function() {
+    if (isClearMode) {
+        clearNullControl();
     }
     win.close();
 }
