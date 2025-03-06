@@ -16,20 +16,62 @@ win.alignChildren = "fill";
 // 添加顶部标题
 var titleGroup = win.add("group");
 titleGroup.alignment = "center";
+titleGroup.margins = 5;
 var titleText = titleGroup.add("statictext", undefined, "高级空对象控制器 v2024.03.21");
 titleText.graphics.font = ScriptUI.newFont("Tahoma", ScriptUI.FontStyle.BOLD, 16);
+titleText.graphics.foregroundColor = titleText.graphics.newPen(titleText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+titleText.helpTip = "按住CTRL点击检查更新";
+
+// 添加标题点击事件
+titleText.addEventListener('mousedown', function(e) {
+    if (e.ctrlKey) {
+        checkForUpdates();
+    }
+});
+
+// 创建帮助面板函数
+function showHelpPanel() {
+    var helpDialog = new Window("dialog", "使用说明");
+    helpDialog.orientation = "column";
+    helpDialog.alignChildren = "left";
+    helpDialog.margins = 20;
+    
+    helpDialog.add("statictext", undefined, "基本操作：");
+    helpDialog.add("statictext", undefined, "1. 选择要控制的图层");
+    helpDialog.add("statictext", undefined, "2. 勾选需要添加的控制属性");
+    helpDialog.add("statictext", undefined, "3. 点击'开搞'创建控制器");
+    
+    helpDialog.add("statictext", undefined, "\n高级选项：");
+    helpDialog.add("statictext", undefined, "- 总控制：添加一个总控制器");
+    helpDialog.add("statictext", undefined, "- 子控制：添加一个子级控制器");
+    
+    helpDialog.add("statictext", undefined, "\n按钮功能：");
+    helpDialog.add("statictext", undefined, "- 开搞（左键）：创建控制器");
+    helpDialog.add("statictext", undefined, "- 开搞（右键）：仅添加表达式");
+    helpDialog.add("statictext", undefined, "- 取消（右键）：清除控制器");
+    
+    var closeBtn = helpDialog.add("button", undefined, "关闭");
+    closeBtn.onClick = function() {
+        helpDialog.close();
+    };
+    
+    helpDialog.center();
+    helpDialog.show();
+}
 
 // 创建主选项容器
 var mainOptionsGroup = win.add("group");
 mainOptionsGroup.orientation = "column";
 mainOptionsGroup.alignChildren = "fill";
+mainOptionsGroup.spacing = 10;
+mainOptionsGroup.spacing = 15;
 
 // 创建「选择要添加的控制」面板
 var optionsGroup = mainOptionsGroup.add("panel", undefined, "选择要添加的控制");
 optionsGroup.orientation = "row";
 optionsGroup.alignChildren = "left";
-optionsGroup.margins = 20;
-optionsGroup.spacing = 20;
+optionsGroup.margins = 15;
+optionsGroup.spacing = 15;
 
 // 添加主控制复选框
 var rotateCheck = optionsGroup.add("checkbox", undefined, "旋转");
@@ -43,8 +85,8 @@ opacityCheck.value = true;
 var advancedGroup = mainOptionsGroup.add("panel", undefined, "高级选项");
 advancedGroup.orientation = "row";
 advancedGroup.alignChildren = "left";
-advancedGroup.margins = 20;
-advancedGroup.spacing = 20;
+advancedGroup.margins = 15;
+advancedGroup.spacing = 15;
 
 // 在高级选项组内创建masterGroup
 var masterGroup = advancedGroup.add("group");
@@ -84,6 +126,8 @@ var btnGroup = win.add("group");
 btnGroup.orientation = "row";
 btnGroup.alignment = "center";
 btnGroup.spacing = 10;
+btnGroup.margins = 15;
+btnGroup.spacing = 10;
 
 // 创建可切换的主按钮
 var mainBtn = btnGroup.add("button", [0, 0, 80, 30], "开搞", {name: "ok"});
@@ -97,7 +141,7 @@ var isClearMode = false;
 
 // 创建帮助按钮
 var helpBtn = btnGroup.add("button", [0, 0, 30, 30], "?", {name: "help"});
-helpBtn.helpTip = "点击检查脚本更新";  // 修改提示文本
+helpBtn.helpTip = "点击查看使用说明";
 
 // 添加版本比较函数
 function compareVersions(current, latest) {
@@ -175,7 +219,7 @@ function checkForUpdates() {
 }
 
 // 修改帮助按钮点击事件
-helpBtn.onClick = checkForUpdates;
+helpBtn.onClick = showHelpPanel;
 
 // 统一按钮文字颜色为白色
 mainBtn.textPen = cancelBtn.textPen = helpBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
@@ -326,6 +370,8 @@ function createNullControl() {
             }
             if (opacityCheck.value) {
                 base_ctrl.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
+            } else if (master_ctrl) {
+                base_ctrl.parent = master_ctrl;
             }
         } else if (master_ctrl) {
             base_ctrl.parent = master_ctrl;
