@@ -19,12 +19,28 @@ optionsGroup.spacing = 20;  // 添加间距
 var rotateCheck = optionsGroup.add("checkbox", undefined, "旋转");
 var scaleCheck = optionsGroup.add("checkbox", undefined, "缩放");
 var opacityCheck = optionsGroup.add("checkbox", undefined, "不透明度");
-// 添加Master控制器选项
-var masterCheck = optionsGroup.add("checkbox", undefined, "Master控制器");
 rotateCheck.value = true;
 scaleCheck.value = true;
 opacityCheck.value = true;
+
+// 添加第二行选项组
+var masterGroup = win.add("group");
+masterGroup.orientation = "row";
+masterGroup.alignment = "left";
+masterGroup.spacing = 10;
+
+// 只保留这两个复选框
+var masterCheck = masterGroup.add("checkbox", undefined, "Master控制");
+var childCheck = masterGroup.add("checkbox", undefined, "子控制");
 masterCheck.value = false;  // 默认不勾选
+childCheck.value = false;  // 默认不勾选
+
+// 删除重复的控件
+// var masterLabel = masterGroup.add("statictext", undefined, "Master控制器");
+// var masterEnableCheck = masterGroup.add("checkbox", undefined, "启用");
+// var masterAdvancedCheck = masterGroup.add("checkbox", undefined, "高级控制");
+// masterEnableCheck.value = false;  // 默认不勾选
+// masterAdvancedCheck.value = false;  // 默认不勾选
 
 // 创建按钮组
 var btnGroup = win.add("group");
@@ -134,7 +150,6 @@ function unlinkParents(layers) {
     });
     return originalParents;
 }
-
 // 主要功能函数
 function createNullControl() {
     try {
@@ -167,47 +182,47 @@ function createNullControl() {
                 topMostLayer = layer;
             }
         });
-
-        // 创建空对象
-        var nullLayerName = selectedLayers[0].name + "_控制器";
-        var null_ctrl = createNullObject(comp, nullLayerName, nullSize, centerPosition, topMostLayer);
         
-        // 如果选择了Master控制器选项，创建Master控制器
+        // 创建空对象
+        // 创建基础空对象（第一个空对象）
+        var nullLayerName = selectedLayers[0].name + "_控制器";
+        var base_ctrl = createNullObject(comp, nullLayerName, nullSize, centerPosition, topMostLayer);
+        
+        // 创建Master控制器（最大的空对象）
         var master_ctrl = null;
         if (masterCheck.value) {
-            var masterNullName = nullLayerName + "_Master";
-            master_ctrl = createNullObject(comp, masterNullName, nullSize * 1.2, centerPosition, null_ctrl);
-            
-            // 将null_ctrl设为master_ctrl的子级
-            null_ctrl.parent = master_ctrl;
-            
-            // 添加表达式控制
-            if (rotateCheck.value) {
-                null_ctrl.rotation.expression = 'value - parent.transform.rotation';
-            }
-            
-            if (scaleCheck.value) {
-                null_ctrl.scale.expression = 's = [];\n' +
-                    'parentScale = parent.transform.scale.value;\n' +
-                    'for (i = 0; i < parentScale.length; i++){\n' +
-                    's[i] = (parentScale[i]== 0) ? 0 : value[i]*100/parentScale[i];\n' +
-                    '}\n' +
-                    's';
-            }
-            
-            if (opacityCheck.value) {
-                null_ctrl.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
-            }
+            var masterNullName = selectedLayers[0].name + "_Master控制";
+            master_ctrl = createNullObject(comp, masterNullName, nullSize * 1.5, centerPosition, base_ctrl);
         }
-
-        // 将所有选中的图层设为空对象的子级
+        
+        // 创建子控制器（中等尺寸）
+        var child_ctrl = null;
+        if (childCheck.value) {
+            var childNullName = selectedLayers[0].name + "_子控制";
+            child_ctrl = createNullObject(comp, childNullName, nullSize * 1.2, centerPosition, base_ctrl);
+            
+            // 将子控制器插入层级
+            if (master_ctrl) {
+                child_ctrl.parent = master_ctrl;
+            }
+            base_ctrl.parent = child_ctrl;
+        } else if (master_ctrl) {
+            base_ctrl.parent = master_ctrl;
+        }
+        // 建立完整的层级链
+        var currentParent = base_ctrl;
+        if (child_ctrl) currentParent = child_ctrl;
+        if (master_ctrl) currentParent = master_ctrl;
+        // 恢复父级关系
+        if (originalParents.length > 0) {
+            currentParent.parent = originalParents[0];
+        }
+        // 将所有选中的图层绑定到基础控制器
         for (var i = 0; i < selectedLayers.length; i++) {
             var layer = selectedLayers[i];
+            layer.parent = base_ctrl;  // 始终绑定到基础控制器
             
-            // 设置父子关系
-            layer.parent = null_ctrl;
-            
-            // 添加表达式控制
+            // 添加表达式控制，不检查父级关系
             if (rotateCheck.value) {
                 layer.rotation.expression = 'value - parent.transform.rotation';
             }
@@ -226,14 +241,10 @@ function createNullControl() {
             }
         }
 
-        // 恢复原有父级关系
+        // 恢复父级关系时使用最顶层的控制器
         if (originalParents.length > 0) {
-            // 如果有Master控制器，将其设为原父级的子级
-            if (master_ctrl) {
-                master_ctrl.parent = originalParents[0];
-            } else {
-                null_ctrl.parent = originalParents[0];
-            }
+            var topController = child_ctrl || (master_ctrl || base_ctrl);
+            topController.parent = originalParents[0];
         }
         
         app.endUndoGroup();
@@ -243,7 +254,6 @@ function createNullControl() {
         return false;
     }
 }
-
 // 检查图层是否有控制器表达式
 function hasControllerExpressions(layer) {
     var hasExpressions = false;
