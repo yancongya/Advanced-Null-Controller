@@ -2,6 +2,11 @@
 // Version: 2024.03.21
 // Author: 烟囱
 // Repository: https://github.com/Tyc-github/Advanced-Null-Controller
+// 版本相关常量
+var CURRENT_VERSION = "2024.03.21";
+var VERSION_URL = "https://raw.githubusercontent.com/Tyc-github/Advanced-Null-Controller/main/version.txt";
+var GITHUB_URL = "https://github.com/Tyc-github/Advanced-Null-Controller";
+var GITEE_URL = "https://gitee.com/tyc-github/Advanced-Null-Controller";
 
 // 创建主面板
 var win = new Window("dialog", "Advanced Null Controller by 烟囱");
@@ -92,12 +97,88 @@ var isClearMode = false;
 
 // 创建帮助按钮
 var helpBtn = btnGroup.add("button", [0, 0, 30, 30], "?", {name: "help"});
-helpBtn.helpTip = "点击访问项目主页\n获取使用说明和更新";
+helpBtn.helpTip = "点击检查脚本更新";  // 修改提示文本
+
+// 添加版本比较函数
+function compareVersions(current, latest) {
+    var currentParts = current.split('.');
+    var latestParts = latest.split('.');
+    
+    for (var i = 0; i < Math.max(currentParts.length, latestParts.length); i++) {
+        var currentPart = parseInt(currentParts[i] || 0, 10);
+        var latestPart = parseInt(latestParts[i] || 0, 10);
+        
+        if (currentPart < latestPart) return true;
+        if (currentPart > latestPart) return false;
+    }
+    return false;
+}
+
+// 添加版本检查功能
+function checkForUpdates() {
+    try {
+        var host = "raw.githubusercontent.com";
+        var path = "/Tyc-github/Advanced-Null-Controller/main/version.txt";
+        
+        var socket = new Socket();
+        if (socket.open(host + ":443", "binary")) {
+            var request = "GET " + path + " HTTP/1.1\r\n" +
+                         "Host: " + host + "\r\n" +
+                         "Connection: close\r\n\r\n";
+            
+            socket.write(request);
+            var response = "";
+            while (!socket.eof) {
+                response += socket.read();
+            }
+            socket.close();
+            
+            // 解析响应内容
+            var responseLines = response.split("\r\n");
+            var latestVersion = responseLines[responseLines.length - 1].trim();
+            
+            if (compareVersions(CURRENT_VERSION, latestVersion)) {
+                var updateDialog = new Window("dialog", "发现新版本");
+                updateDialog.orientation = "column";
+                updateDialog.add("statictext", undefined, "当前版本: " + CURRENT_VERSION + "\n最新版本: " + latestVersion + "\n是否前往下载更新？");
+                
+                var btnGroup = updateDialog.add("group");
+                var githubBtn = btnGroup.add("button", undefined, "GitHub仓库");
+                var giteeBtn = btnGroup.add("button", undefined, "Gitee仓库");
+                var cancelBtn = btnGroup.add("button", undefined, "取消");
+                
+                githubBtn.onClick = function() {
+                    system.callSystem('cmd.exe /c start "" "' + GITHUB_URL + '"');
+                    updateDialog.close();
+                }
+                
+                giteeBtn.onClick = function() {
+                    system.callSystem('cmd.exe /c start "" "' + GITEE_URL + '"');
+                    updateDialog.close();
+                }
+                
+                cancelBtn.onClick = function() {
+                    updateDialog.close();
+                }
+                
+                updateDialog.center();
+                updateDialog.show();
+            } else {
+                alert("当前已是最新版本 (" + CURRENT_VERSION + ")");
+            }
+        } else {
+            alert("无法连接到更新服务器，请手动访问仓库查看\nGitHub: " + GITHUB_URL + "\nGitee: " + GITEE_URL);
+        }
+    } catch (err) {
+        alert("更新检查失败: " + err.toString());
+    }
+}
+
+// 修改帮助按钮点击事件
+helpBtn.onClick = checkForUpdates;
 
 // 统一按钮文字颜色为白色
 mainBtn.textPen = cancelBtn.textPen = helpBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
-
-// 后续代码保持不变...
 
 // 添加主按钮右键菜单事件
 mainBtn.addEventListener('mousedown', function(e) {
@@ -117,15 +198,7 @@ cancelBtn.addEventListener('mousedown', function(e) {
     }
 });
 
-// 添加帮助按钮点击事件
-helpBtn.onClick = function() {
-    try {
-        // 尝试打开项目链接
-        system.callSystem('cmd.exe /c start "" "https://github.com/Tyc-github/Advanced-Null-Controller"');
-    } catch(err) {
-        alert("无法打开链接，请手动访问：\nhttps://github.com/Tyc-github/Advanced-Null-Controller");
-    }
-}
+
 
 // 计算所选图层的中心位置
 function calculateCenterPosition(layers) {
