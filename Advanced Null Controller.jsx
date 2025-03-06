@@ -8,14 +8,25 @@ var win = new Window("dialog", "Advanced Null Controller by 烟囱");
 win.orientation = "column";
 win.alignChildren = "fill";
 
-// 创建选项组，改为横向排版
-var optionsGroup = win.add("panel", undefined, "选择要添加的控制");
-optionsGroup.orientation = "row";  // 改为横向
+// 添加顶部标题
+var titleGroup = win.add("group");
+titleGroup.alignment = "center";
+var titleText = titleGroup.add("statictext", undefined, "高级空对象控制器 v2024.03.21");
+titleText.graphics.font = ScriptUI.newFont("Tahoma", ScriptUI.FontStyle.BOLD, 16);
+
+// 创建主选项容器
+var mainOptionsGroup = win.add("group");
+mainOptionsGroup.orientation = "column";
+mainOptionsGroup.alignChildren = "fill";
+
+// 创建「选择要添加的控制」面板
+var optionsGroup = mainOptionsGroup.add("panel", undefined, "选择要添加的控制");
+optionsGroup.orientation = "row";
 optionsGroup.alignChildren = "left";
 optionsGroup.margins = 20;
-optionsGroup.spacing = 20;  // 添加间距
+optionsGroup.spacing = 20;
 
-// 添加复选框，默认全部勾选
+// 添加主控制复选框
 var rotateCheck = optionsGroup.add("checkbox", undefined, "旋转");
 var scaleCheck = optionsGroup.add("checkbox", undefined, "缩放");
 var opacityCheck = optionsGroup.add("checkbox", undefined, "不透明度");
@@ -23,47 +34,70 @@ rotateCheck.value = true;
 scaleCheck.value = true;
 opacityCheck.value = true;
 
-// 添加第二行选项组
-var masterGroup = win.add("group");
+// 新增「高级选项」组
+var advancedGroup = mainOptionsGroup.add("panel", undefined, "高级选项");
+advancedGroup.orientation = "row";
+advancedGroup.alignChildren = "left";
+advancedGroup.margins = 20;
+advancedGroup.spacing = 20;
+
+// 在高级选项组内创建masterGroup
+var masterGroup = advancedGroup.add("group");
 masterGroup.orientation = "row";
 masterGroup.alignment = "left";
 masterGroup.spacing = 10;
 
-// 只保留这两个复选框
-var masterCheck = masterGroup.add("checkbox", undefined, "Master控制");
-var childCheck = masterGroup.add("checkbox", undefined, "子控制");
-masterCheck.value = false;  // 默认不勾选
-childCheck.value = false;  // 默认不勾选
+// 总控制复选框
+var masterCheck = masterGroup.add("checkbox", undefined, "总控制");
+masterCheck.helpTip = "再套一层控制作为总控";
+// 子控制复选框
+var childCheck = masterGroup.add("checkbox", undefined, "子控制"); 
+childCheck.helpTip = "再套一层控制子级的属性";
 
-// 删除重复的控件
-// var masterLabel = masterGroup.add("statictext", undefined, "Master控制器");
-// var masterEnableCheck = masterGroup.add("checkbox", undefined, "启用");
-// var masterAdvancedCheck = masterGroup.add("checkbox", undefined, "高级控制");
-// masterEnableCheck.value = false;  // 默认不勾选
-// masterAdvancedCheck.value = false;  // 默认不勾选
+// 添加互斥逻辑
+function updateCheckboxes(clickedCheck) {
+    if(clickedCheck.value) {
+        if(clickedCheck === masterCheck) {
+            childCheck.value = false;
+        } else {
+            masterCheck.value = false;
+        }
+    }
+}
+
+masterCheck.onClick = function() {
+    updateCheckboxes(masterCheck);
+}
+childCheck.onClick = function() {
+    updateCheckboxes(childCheck);
+}
+masterCheck.value = false;
+childCheck.value = false;
 
 // 创建按钮组
 var btnGroup = win.add("group");
 btnGroup.orientation = "row";
 btnGroup.alignment = "center";
-btnGroup.spacing = 10; // 添加按钮间距
+btnGroup.spacing = 10;
 
 // 创建可切换的主按钮
-var mainBtn = btnGroup.add("button", [0, 0, 80, 30], "开搞", {name: "ok"}); // 设置固定大小
+var mainBtn = btnGroup.add("button", [0, 0, 80, 30], "开搞", {name: "ok"});
 mainBtn.helpTip = "左键点击执行\n右键点击切换模式";
 var isExpressionMode = false;
 
 // 创建可切换的取消按钮
-var cancelBtn = btnGroup.add("button", [0, 0, 80, 30], "取消", {name: "cancel"}); // 设置相同大小
+var cancelBtn = btnGroup.add("button", [0, 0, 80, 30], "取消", {name: "cancel"});
 cancelBtn.helpTip = "左键点击执行\n右键点击切换模式";
 var isClearMode = false;
 
 // 创建帮助按钮
-var helpBtn = btnGroup.add("button", [0, 0, 30, 30], "?", {name: "help"}); // 小圆形按钮
+var helpBtn = btnGroup.add("button", [0, 0, 30, 30], "?", {name: "help"});
 helpBtn.helpTip = "点击访问项目主页\n获取使用说明和更新";
 
 // 统一按钮文字颜色为白色
 mainBtn.textPen = cancelBtn.textPen = helpBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+
+// 后续代码保持不变...
 
 // 添加主按钮右键菜单事件
 mainBtn.addEventListener('mousedown', function(e) {
@@ -194,7 +228,6 @@ function createNullControl() {
             var masterNullName = selectedLayers[0].name + "_Master控制";
             master_ctrl = createNullObject(comp, masterNullName, nullSize * 1.5, centerPosition, base_ctrl);
         }
-        
         // 创建子控制器（中等尺寸）
         var child_ctrl = null;
         if (childCheck.value) {
@@ -206,6 +239,21 @@ function createNullControl() {
                 child_ctrl.parent = master_ctrl;
             }
             base_ctrl.parent = child_ctrl;
+            // 始终为第一个控制器添加表达式
+            if (rotateCheck.value) {
+                base_ctrl.rotation.expression = 'value - parent.transform.rotation';
+            }
+            if (scaleCheck.value) {
+                base_ctrl.scale.expression = 's = [];\n' +
+                    'parentScale = parent.transform.scale.value;\n' +
+                    'for (i = 0; i < parentScale.length; i++){\n' +
+                    's[i] = (parentScale[i]== 0) ? 0 : value[i]*100/parentScale[i];\n' +
+                    '}\n' +
+                    's';
+            }
+            if (opacityCheck.value) {
+                base_ctrl.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
+            }
         } else if (master_ctrl) {
             base_ctrl.parent = master_ctrl;
         }
