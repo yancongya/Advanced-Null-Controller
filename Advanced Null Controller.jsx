@@ -19,9 +19,12 @@ optionsGroup.spacing = 20;  // 添加间距
 var rotateCheck = optionsGroup.add("checkbox", undefined, "旋转");
 var scaleCheck = optionsGroup.add("checkbox", undefined, "缩放");
 var opacityCheck = optionsGroup.add("checkbox", undefined, "不透明度");
+// 添加Master控制器选项
+var masterCheck = optionsGroup.add("checkbox", undefined, "Master控制器");
 rotateCheck.value = true;
 scaleCheck.value = true;
 opacityCheck.value = true;
+masterCheck.value = false;  // 默认不勾选
 
 // 创建按钮组
 var btnGroup = win.add("group");
@@ -168,6 +171,34 @@ function createNullControl() {
         // 创建空对象
         var nullLayerName = selectedLayers[0].name + "_控制器";
         var null_ctrl = createNullObject(comp, nullLayerName, nullSize, centerPosition, topMostLayer);
+        
+        // 如果选择了Master控制器选项，创建Master控制器
+        var master_ctrl = null;
+        if (masterCheck.value) {
+            var masterNullName = nullLayerName + "_Master";
+            master_ctrl = createNullObject(comp, masterNullName, nullSize * 1.2, centerPosition, null_ctrl);
+            
+            // 将null_ctrl设为master_ctrl的子级
+            null_ctrl.parent = master_ctrl;
+            
+            // 添加表达式控制
+            if (rotateCheck.value) {
+                null_ctrl.rotation.expression = 'value - parent.transform.rotation';
+            }
+            
+            if (scaleCheck.value) {
+                null_ctrl.scale.expression = 's = [];\n' +
+                    'parentScale = parent.transform.scale.value;\n' +
+                    'for (i = 0; i < parentScale.length; i++){\n' +
+                    's[i] = (parentScale[i]== 0) ? 0 : value[i]*100/parentScale[i];\n' +
+                    '}\n' +
+                    's';
+            }
+            
+            if (opacityCheck.value) {
+                null_ctrl.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
+            }
+        }
 
         // 将所有选中的图层设为空对象的子级
         for (var i = 0; i < selectedLayers.length; i++) {
@@ -197,7 +228,12 @@ function createNullControl() {
 
         // 恢复原有父级关系
         if (originalParents.length > 0) {
-            null_ctrl.parent = originalParents[0];
+            // 如果有Master控制器，将其设为原父级的子级
+            if (master_ctrl) {
+                master_ctrl.parent = originalParents[0];
+            } else {
+                null_ctrl.parent = originalParents[0];
+            }
         }
         
         app.endUndoGroup();
