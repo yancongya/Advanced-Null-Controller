@@ -11,6 +11,23 @@
 - **仓库地址**：https://github.com/Tyc-github/Advanced-Null-Controller
 - **问题反馈**：[Issues](https://github.com/Tyc-github/Advanced-Null-Controller/issues)
 
+## 🔄 工作流程
+
+脚本工作流程如下：
+1. 启动脚本
+2. 创建UI界面
+3. 用户交互（分为三个主要分支）
+   - 标题栏点击(Ctrl+Click) → 检查更新
+   - 帮助按钮点击 → 显示帮助面板
+   - 主功能按钮点击 → 功能模式选择
+4. 功能模式（分为两个主要分支）
+   - 创建模式 → 选择图层校验 → 执行成功/错误提示
+   - 清除模式 → 执行清除操作
+
+![工作流程图](./assets/Advanced%20Null%20Controller.png)
+
+详细流程图可在 [workflow.md](./assets/workflow.md) 中查看。
+
 ## ✨ 功能特点
 
 ### 🛠 主要功能
