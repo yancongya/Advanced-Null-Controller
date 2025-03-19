@@ -44,6 +44,7 @@ function showHelpPanel() {
     helpDialog.add("statictext", undefined, "\n高级选项：");
     helpDialog.add("statictext", undefined, "- 总控制：添加一个总控制器");
     helpDialog.add("statictext", undefined, "- 子控制：添加一个子级控制器");
+    helpDialog.add("statictext", undefined, "- 整体控制：选中图层时创建整体控制器，未选中时查找未控制图层");
     
     helpDialog.add("statictext", undefined, "\n按钮功能：");
     helpDialog.add("statictext", undefined, "- 开搞（左键）：创建控制器");
@@ -103,7 +104,7 @@ childCheck.helpTip = "再套一层控制子级的属性";
 
 // 添加整体控制按钮
 var globalControlBtn = masterGroup.add("statictext", undefined, "整体控制");
-globalControlBtn.helpTip = "查找未设置控制器的图层";
+globalControlBtn.helpTip = "选中图层时创建整体控制器，未选中时查找未控制图层";
 globalControlBtn.preferredSize.width = 80;
 globalControlBtn.graphics.foregroundColor = globalControlBtn.graphics.newPen(globalControlBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
 globalControlBtn.addEventListener('mouseover', function() {
@@ -119,29 +120,75 @@ globalControlBtn.addEventListener('mousedown', function() {
         return;
     }
 
-    // 遍历所有图层，找出未设置控制器的图层
-    var layersWithoutController = [];
-    for (var i = 1; i <= comp.numLayers; i++) {
-        var layer = comp.layer(i);
-        // 修改逻辑：只有同时没有父级和没有控制器表达式的图层才被选中
-        if (layer.parent === null && !hasControllerExpressions(layer)) {
-            layersWithoutController.push(layer);
+    // 检查是否已经选中了图层
+    var selectedLayers = comp.selectedLayers;
+    
+    // 如果已经选中了图层，为它们创建一个共同的空对象控制器
+    if (selectedLayers.length > 0) {
+        app.beginUndoGroup("创建整体控制器");
+        
+        // 过滤掉已经有父级的图层
+        var validLayers = [];
+        for (var i = 0; i < selectedLayers.length; i++) {
+            if (selectedLayers[i].parent === null) {
+                validLayers.push(selectedLayers[i]);
+            }
         }
-    }
-
-    // 如果找到未设置控制器的图层，选中它们
-    if (layersWithoutController.length > 0) {
-        // 取消所有图层的选择
-        for (var i = 1; i <= comp.numLayers; i++) {
-            comp.layer(i).selected = false;
+        
+        if (validLayers.length === 0) {
+            alert("请选择至少一个没有父级的图层！");
+            app.endUndoGroup();
+            return;
         }
-        // 选中未设置控制器的图层
-        for (var i = 0; i < layersWithoutController.length; i++) {
-            layersWithoutController[i].selected = true;
+        
+        // 计算中心位置
+        var centerPosition = calculateCenterPosition(validLayers);
+        
+        // 获取最上层的图层
+        var topMostLayer = validLayers[0];
+        validLayers.forEach(function(layer) {
+            if (layer.index < topMostLayer.index) {
+                topMostLayer = layer;
+            }
+        });
+        
+        // 创建基础空对象
+        var nullSize = 100;
+        var nullLayerName = "整体控制器";
+        var ctrl = createNullObject(comp, nullLayerName, nullSize, centerPosition, topMostLayer);
+        
+        // 将所有有效图层设置为空对象的子级
+        for (var i = 0; i < validLayers.length; i++) {
+            validLayers[i].parent = ctrl;
         }
-        alert("已选中 " + layersWithoutController.length + " 个未设置控制器的图层");
+        
+        app.endUndoGroup();
+        alert("已为选中的 " + validLayers.length + " 个图层创建整体控制器");
     } else {
-        alert("所有图层都已设置控制器！");
+        // 如果没有选中图层，则查找未设置控制器的图层
+        var layersWithoutController = [];
+        for (var i = 1; i <= comp.numLayers; i++) {
+            var layer = comp.layer(i);
+            // 修改逻辑：只有同时没有父级和没有控制器表达式的图层才被选中
+            if (layer.parent === null && !hasControllerExpressions(layer)) {
+                layersWithoutController.push(layer);
+            }
+        }
+
+        // 如果找到未设置控制器的图层，选中它们
+        if (layersWithoutController.length > 0) {
+            // 取消所有图层的选择
+            for (var i = 1; i <= comp.numLayers; i++) {
+                comp.layer(i).selected = false;
+            }
+            // 选中未设置控制器的图层
+            for (var i = 0; i < layersWithoutController.length; i++) {
+                layersWithoutController[i].selected = true;
+            }
+            alert("已选中 " + layersWithoutController.length + " 个未设置控制器的图层");
+        } else {
+            alert("所有图层都已设置控制器！");
+        }
     }
 });
 // 添加互斥逻辑
