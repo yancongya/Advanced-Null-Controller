@@ -42,8 +42,8 @@ function showHelpPanel() {
     helpDialog.add("statictext", undefined, "3. 点击'开搞'创建控制器");
     
     helpDialog.add("statictext", undefined, "\n高级选项：");
-    helpDialog.add("statictext", undefined, "- 总控制：添加一个总控制器");
-    helpDialog.add("statictext", undefined, "- 子控制：添加一个子级控制器");
+    helpDialog.add("statictext", undefined, "- 总控制：右键点击激活，添加一个总控制器");
+    helpDialog.add("statictext", undefined, "- 子控制：右键点击激活，添加一个子级控制器");
     helpDialog.add("statictext", undefined, "- 整体控制：选中图层时创建整体控制器，未选中时查找未控制图层");
     
     helpDialog.add("statictext", undefined, "\n按钮功能：");
@@ -95,12 +95,21 @@ masterGroup.orientation = "row";
 masterGroup.alignment = "left";
 masterGroup.spacing = 10;
 
-// 总控制复选框
-var masterCheck = masterGroup.add("checkbox", undefined, "总控制");
-masterCheck.helpTip = "再套一层控制作为总控";
-// 子控制复选框
-var childCheck = masterGroup.add("checkbox", undefined, "子控制"); 
-childCheck.helpTip = "再套一层控制子级的属性";
+// 总控制文本标签
+var masterText = masterGroup.add("statictext", undefined, "总控制");
+masterText.helpTip = "再套一层控制作为总控\n右键点击切换激活状态";
+masterText.preferredSize.width = 80;
+masterText.graphics.foregroundColor = masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+
+// 子控制文本标签
+var childText = masterGroup.add("statictext", undefined, "子控制"); 
+childText.helpTip = "再套一层控制子级的属性\n右键点击切换激活状态";
+childText.preferredSize.width = 80;
+childText.graphics.foregroundColor = childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+
+// 添加变量跟踪激活状态
+var masterActive = false;
+var childActive = false;
 
 // 添加整体控制按钮
 var globalControlBtn = masterGroup.add("statictext", undefined, "整体控制");
@@ -191,25 +200,36 @@ globalControlBtn.addEventListener('mousedown', function() {
         }
     }
 });
-// 添加互斥逻辑
-function updateCheckboxes(clickedCheck) {
-    if(clickedCheck.value) {
-        if(clickedCheck === masterCheck) {
-            childCheck.value = false;
-        } else {
-            masterCheck.value = false;
-        }
+// 添加右键点击事件处理
+masterText.addEventListener('mousedown', function(e) {
+    if (e.button == 2) {  // 右键点击
+        masterActive = !masterActive;
+        childActive = false;  // 互斥逻辑
+        
+        // 更新视觉反馈
+        masterText.graphics.foregroundColor = masterActive ? 
+            masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [0.3, 0.8, 0.3, 1], 1) : 
+            masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+        childText.graphics.foregroundColor = childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+        
+        e.preventDefault();
     }
-}
+});
 
-masterCheck.onClick = function() {
-    updateCheckboxes(masterCheck);
-}
-childCheck.onClick = function() {
-    updateCheckboxes(childCheck);
-}
-masterCheck.value = false;
-childCheck.value = false;
+childText.addEventListener('mousedown', function(e) {
+    if (e.button == 2) {  // 右键点击
+        childActive = !childActive;
+        masterActive = false;  // 互斥逻辑
+        
+        // 更新视觉反馈
+        childText.graphics.foregroundColor = childActive ? 
+            childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [0.3, 0.8, 0.3, 1], 1) : 
+            childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+        masterText.graphics.foregroundColor = masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+        
+        e.preventDefault();
+    }
+});
 
 // 创建按钮组
 var btnGroup = win.add("group");
@@ -445,18 +465,20 @@ function createNullControl() {
         
         // 创建Master控制器（最大的空对象）
         var master_ctrl = null;
-        if (masterCheck.value) {
+        if (masterActive) {
             var masterNullName = selectedLayers[0].name + "_Master控制";
             master_ctrl = createNullObject(comp, masterNullName, nullSize * 1.5, centerPosition, base_ctrl);
         }
         // 创建子控制器（中等尺寸）
         var child_ctrl = null;
-        if (childCheck.value) {
+        if (childActive) {
             var childNullName = selectedLayers[0].name + "_子控制";
             child_ctrl = createNullObject(comp, childNullName, nullSize * 1.2, centerPosition, base_ctrl);
-            
-            // 将子控制器插入层级
-            if (master_ctrl) {
+        }
+        
+        // 建立层级关系
+        if (childActive) {
+            if (masterActive) {
                 child_ctrl.parent = master_ctrl;
             }
             base_ctrl.parent = child_ctrl;
@@ -474,9 +496,9 @@ function createNullControl() {
             }
             if (opacityCheck.value) {
                 base_ctrl.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
-            } else if (master_ctrl) {
-                base_ctrl.parent = master_ctrl;
             }
+        } else if (masterActive) {
+            base_ctrl.parent = master_ctrl;
         } else if (master_ctrl) {
             base_ctrl.parent = master_ctrl;
         }
