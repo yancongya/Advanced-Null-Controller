@@ -651,7 +651,7 @@ function createNullControl() {
                 topMostLayer = layer;
             }
         });
-        
+
         // 创建空对象
         // 创建基础空对象（第一个空对象）
         var nullLayerName = selectedLayers[0].name + "_控制器";

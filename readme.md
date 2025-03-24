@@ -26,7 +26,6 @@
    - 创建模式 → 选择图层校验 → 执行成功/错误提示
    - 清除模式 → 执行清除操作
 
-<img src="./assets/Advanced%20Null%20Controller.png" alt="工作流程图" width="70%" />
 
 ## ✨ 功能特点
 
