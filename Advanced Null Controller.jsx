@@ -3,22 +3,178 @@
 // Author: 烟囱
 // Repository: https://github.com/Tyc-github/Advanced-Null-Controller
 // 版本相关常量
-var CURRENT_VERSION = "2024.03.21";
+var CURRENT_VERSION = "2024.03.24";
 var VERSION_URL = "https://raw.githubusercontent.com/Tyc-github/Advanced-Null-Controller/main/version.txt";
 var GITHUB_URL = "https://github.com/Tyc-github/Advanced-Null-Controller";
-var GITEE_URL = "https://gitee.com/tyc-github/Advanced-Null-Controller";
+var GITEE_URL = "https://gitee.com/itycon/Advanced-Null-Controller";
 
 // 创建主面板
 var win = new Window("dialog", "Advanced Null Controller by 烟囱");
 win.orientation = "column";
 win.alignChildren = "fill";
+win.spacing = 10; // 增加整体间距
+win.margins = [10, 14, 10, 14]; // 增加上下边距
+
+// 添加自定义绘制事件
+win.graphics.onDraw = function() {
+    var g = this;
+    var bounds = [0, 0, win.size[0], win.size[1]];
+    g.newPath();
+    g.rectPath(bounds[0], bounds[1], bounds[2], bounds[3], 12); // 添加圆角
+    g.fillPath(g.newBrush(g.BrushType.SOLID_COLOR, [0.2, 0.2, 0.2, 1]));
+    
+    // 添加微妙的渐变效果
+    g.newPath();
+    g.moveTo(bounds[0], bounds[1]);
+    g.lineTo(bounds[2], bounds[1]);
+    g.strokePath(g.newPen(g.PenType.SOLID_COLOR, [0.3, 0.3, 0.3, 0.5], 1));
+}
+
+// 创建自定义面板样式函数
+function createStyledPanel(parent, title) {
+    var panel = parent.add("panel", undefined, title);
+    panel.margins = 16;
+    panel.spacing = 20;
+    
+    // 设置面板标题样式
+    panel.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 12);
+    panel.graphics.foregroundColor = panel.graphics.newPen(panel.graphics.PenType.SOLID_COLOR, [0.9, 0.9, 0.9, 1], 1);
+    
+    // 添加自定义绘制事件
+    panel.graphics.onDraw = function() {
+        var g = this;
+        var bounds = [0, 0, panel.size[0], panel.size[1]];
+        g.newPath();
+        g.rectPath(bounds[0], bounds[1], bounds[2], bounds[3], 8);
+        g.fillPath(g.newBrush(g.BrushType.SOLID_COLOR, [0.25, 0.25, 0.25, 1]));
+        
+        // 添加微妙的边框效果
+        g.newPath();
+        g.rectPath(bounds[0], bounds[1], bounds[2], bounds[3], 8);
+        g.strokePath(g.newPen(g.PenType.SOLID_COLOR, [0.3, 0.3, 0.3, 1], 1));
+        
+        // 添加顶部渐变效果
+        g.newPath();
+        g.moveTo(bounds[0] + 8, bounds[1] + 1);
+        g.lineTo(bounds[2] - 8, bounds[1] + 1);
+        g.strokePath(g.newPen(g.PenType.SOLID_COLOR, [0.35, 0.35, 0.35, 1], 1));
+    }
+    
+    return panel;
+}
+
+// 创建自定义按钮样式函数
+function createStyledButton(parent, text, size, isPrimary) {
+    var btn = parent.add("button", [0, 0, size[0], size[1]], text);
+    btn.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+    
+    // 设置基础样式
+    var normalColor = isPrimary ? [0.3, 0.6, 0.9, 1] : [0.35, 0.35, 0.35, 1];
+    var hoverColor = isPrimary ? [0.4, 0.7, 1, 1] : [0.45, 0.45, 0.45, 1];
+    var activeColor = isPrimary ? [0.2, 0.5, 0.8, 1] : [0.25, 0.25, 0.25, 1];
+    
+    btn.graphics.foregroundColor = btn.graphics.newPen(btn.graphics.PenType.SOLID_COLOR, normalColor, 1);
+    
+    // 添加鼠标事件
+    var isPressed = false;
+    
+    btn.addEventListener('mouseover', function() {
+        if (!isPressed) {
+            this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, hoverColor, 1);
+        }
+    });
+    
+    btn.addEventListener('mouseout', function() {
+        isPressed = false;
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, normalColor, 1);
+    });
+    
+    btn.addEventListener('mousedown', function() {
+        isPressed = true;
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, activeColor, 1);
+    });
+    
+    btn.addEventListener('mouseup', function() {
+        isPressed = false;
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, hoverColor, 1);
+    });
+    
+    return btn;
+}
+
+// 创建自定义复选框样式函数
+function createStyledCheckbox(parent, text) {
+    var checkbox = parent.add("checkbox", undefined, text);
+    checkbox.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+    
+    var normalColor = [0.9, 0.9, 0.9, 1];
+    var hoverColor = [1, 1, 1, 1];
+    var activeColor = [0.3, 0.8, 0.3, 1];
+    
+    checkbox.graphics.foregroundColor = checkbox.graphics.newPen(checkbox.graphics.PenType.SOLID_COLOR, normalColor, 1);
+    
+    // 添加鼠标事件
+    checkbox.addEventListener('mouseover', function() {
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, hoverColor, 1);
+    });
+    
+    checkbox.addEventListener('mouseout', function() {
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, 
+            this.value ? activeColor : normalColor, 1);
+    });
+    
+    checkbox.addEventListener('click', function() {
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR,
+            this.value ? activeColor : normalColor, 1);
+    });
+    
+    return checkbox;
+}
+
+// 创建自定义文本标签样式函数
+function createStyledText(parent, text, width, isClickable) {
+    var txt = parent.add("statictext", undefined, text);
+    txt.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+    
+    var normalColor = [0.9, 0.9, 0.9, 1];
+    var hoverColor = [1, 1, 1, 1];
+    var activeColor = [0.3, 0.8, 0.3, 1];
+    
+    if (width) txt.preferredSize.width = width;
+    
+    txt.graphics.foregroundColor = txt.graphics.newPen(txt.graphics.PenType.SOLID_COLOR, normalColor, 1);
+    
+    if (isClickable) {
+        // 添加鼠标事件
+        var isActive = false;
+        
+        txt.addEventListener('mouseover', function() {
+            this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, hoverColor, 1);
+            this.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 12);
+        });
+        
+        txt.addEventListener('mouseout', function() {
+            this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR,
+                isActive ? activeColor : normalColor, 1);
+            this.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+        });
+        
+        txt.addEventListener('mousedown', function() {
+            isActive = !isActive;
+            this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR,
+                isActive ? activeColor : normalColor, 1);
+        });
+    }
+    
+    return txt;
+}
 
 // 添加顶部标题
 var titleGroup = win.add("group");
 titleGroup.alignment = "center";
-titleGroup.margins = 5;
+titleGroup.margins = [0, 4, 0, 8]; // 调整标题边距
 var titleText = titleGroup.add("statictext", undefined, "高级空对象控制器 v2024.03.21");
-titleText.graphics.font = ScriptUI.newFont("Tahoma", ScriptUI.FontStyle.BOLD, 16);
+titleText.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 15);
 titleText.graphics.foregroundColor = titleText.graphics.newPen(titleText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
 titleText.helpTip = "按住CTRL点击检查更新";
 
@@ -33,25 +189,74 @@ titleText.addEventListener('mousedown', function(e) {
 function showHelpPanel() {
     var helpDialog = new Window("dialog", "使用说明");
     helpDialog.orientation = "column";
-    helpDialog.alignChildren = "left";
-    helpDialog.margins = 20;
+    helpDialog.alignChildren = "fill";
+    helpDialog.margins = 14;
+    helpDialog.spacing = 8;
     
-    helpDialog.add("statictext", undefined, "基本操作：");
-    helpDialog.add("statictext", undefined, "1. 选择要控制的图层");
-    helpDialog.add("statictext", undefined, "2. 勾选需要添加的控制属性");
-    helpDialog.add("statictext", undefined, "3. 点击'开搞'创建控制器");
+    // 添加标题样式
+    function addTitle(text) {
+        var title = helpDialog.add("statictext", undefined, text);
+        title.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 13);
+        title.graphics.foregroundColor = title.graphics.newPen(title.graphics.PenType.SOLID_COLOR, [0.3, 0.6, 0.9, 1], 1);
+        return title;
+    }
     
-    helpDialog.add("statictext", undefined, "\n高级选项：");
-    helpDialog.add("statictext", undefined, "- 总控制：右键点击激活，添加一个总控制器");
-    helpDialog.add("statictext", undefined, "- 子控制：右键点击激活，添加一个子级控制器");
-    helpDialog.add("statictext", undefined, "- 整体控制：选中图层时创建整体控制器，未选中时查找未控制图层");
+    // 添加内容样式
+    function addContent(text) {
+        var content = helpDialog.add("statictext", undefined, text);
+        content.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+        content.graphics.foregroundColor = content.graphics.newPen(content.graphics.PenType.SOLID_COLOR, [0.9, 0.9, 0.9, 1], 1);
+        content.margins = [10, 0, 0, 0]; // 添加左边距，形成层级感
+        return content;
+    }
     
-    helpDialog.add("statictext", undefined, "\n按钮功能：");
-    helpDialog.add("statictext", undefined, "- 开搞（左键）：创建控制器");
-    helpDialog.add("statictext", undefined, "- 开搞（右键）：仅添加表达式");
-    helpDialog.add("statictext", undefined, "- 取消（右键）：清除控制器");
+    // 添加分隔线
+    function addSeparator() {
+        var separator = helpDialog.add("panel");
+        separator.alignment = "fill";
+        separator.height = 1;
+        return separator;
+    }
     
-    var closeBtn = helpDialog.add("button", undefined, "关闭");
+    addTitle("基本操作：");
+    addContent("1. 选择要控制的图层");
+    addContent("2. 勾选需要添加的控制属性");
+    addContent("3. 点击'开搞'创建控制器");
+    
+    addSeparator();
+    
+    addTitle("高级选项：");
+    addContent("- 总控制：右键点击激活，添加一个总控制器");
+    addContent("- 子控制：右键点击激活，添加一个子级控制器");
+    addContent("- 整体控制：选中图层时创建整体控制器，未选中时查找未控制图层");
+    
+    addSeparator();
+    
+    addTitle("按钮功能：");
+    addContent("- 开搞（左键）：创建控制器");
+    addContent("- 开搞（右键）：仅添加表达式");
+    addContent("- 取消（右键）：清除控制器");
+    
+    // 添加按钮组
+    var btnGroup = helpDialog.add("group");
+    btnGroup.orientation = "row";
+    btnGroup.alignment = "center";
+    btnGroup.margins = [0, 8, 0, 0];
+    btnGroup.spacing = 8;
+    
+    // 添加项目主页按钮
+    var githubBtn = createStyledButton(btnGroup, "GitHub", [75, 28], false);
+    var giteeBtn = createStyledButton(btnGroup, "Gitee", [75, 28], false);
+    var closeBtn = createStyledButton(btnGroup, "关闭", [75, 28], true);
+    
+    githubBtn.onClick = function() {
+        system.callSystem('cmd.exe /c start "" "' + GITHUB_URL + '"');
+    }
+    
+    giteeBtn.onClick = function() {
+        system.callSystem('cmd.exe /c start "" "' + GITEE_URL + '"');
+    }
+    
     closeBtn.onClick = function() {
         helpDialog.close();
     };
@@ -64,58 +269,59 @@ function showHelpPanel() {
 var mainOptionsGroup = win.add("group");
 mainOptionsGroup.orientation = "column";
 mainOptionsGroup.alignChildren = "fill";
-mainOptionsGroup.spacing = 10;
-mainOptionsGroup.spacing = 15;
+mainOptionsGroup.spacing = 8; // 调整面板间距
+mainOptionsGroup.margins = [0, 2, 0, 2]; // 添加小边距
 
 // 创建「选择要添加的控制」面板
-var optionsGroup = mainOptionsGroup.add("panel", undefined, "选择要添加的控制");
+var optionsGroup = createStyledPanel(mainOptionsGroup, "选择要添加的控制");
 optionsGroup.orientation = "row";
-optionsGroup.alignChildren = "left";
-optionsGroup.margins = 15;
-optionsGroup.spacing = 15;
+optionsGroup.alignChildren = ["center", "center"];
+optionsGroup.margins = [10, 12, 10, 12]; // 增加内边距
+optionsGroup.spacing = 15; // 增加复选框间距
 
 // 添加主控制复选框
-var rotateCheck = optionsGroup.add("checkbox", undefined, "旋转");
-var scaleCheck = optionsGroup.add("checkbox", undefined, "缩放");
-var opacityCheck = optionsGroup.add("checkbox", undefined, "不透明度");
+var checkboxGroup = optionsGroup.add("group");
+checkboxGroup.orientation = "row";
+checkboxGroup.alignChildren = "center";
+checkboxGroup.spacing = 15;
+
+var rotateCheck = createStyledCheckbox(checkboxGroup, "旋转");
+var scaleCheck = createStyledCheckbox(checkboxGroup, "缩放");
+var opacityCheck = createStyledCheckbox(checkboxGroup, "不透明度");
+
 rotateCheck.value = true;
 scaleCheck.value = true;
 opacityCheck.value = true;
 
 // 新增「高级选项」组
-var advancedGroup = mainOptionsGroup.add("panel", undefined, "高级选项");
+var advancedGroup = createStyledPanel(mainOptionsGroup, "高级选项");
 advancedGroup.orientation = "row";
-advancedGroup.alignChildren = "left";
-advancedGroup.margins = 15;
-advancedGroup.spacing = 15;
+advancedGroup.alignChildren = ["center", "center"];
+advancedGroup.margins = [10, 12, 10, 12]; // 增加内边距
 
 // 在高级选项组内创建masterGroup
 var masterGroup = advancedGroup.add("group");
 masterGroup.orientation = "row";
-masterGroup.alignment = "left";
-masterGroup.spacing = 10;
+masterGroup.alignment = "center";
+masterGroup.spacing = 15; // 增加选项间距
 
 // 总控制文本标签
-var masterText = masterGroup.add("statictext", undefined, "总控制");
+var masterText = createStyledText(masterGroup, "总控制", 70, true);
 masterText.helpTip = "再套一层控制作为总控\n右键点击切换激活状态";
-masterText.preferredSize.width = 80;
-masterText.graphics.foregroundColor = masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
 
 // 子控制文本标签
-var childText = masterGroup.add("statictext", undefined, "子控制"); 
+var childText = createStyledText(masterGroup, "子控制", 70, true);
 childText.helpTip = "再套一层控制子级的属性\n右键点击切换激活状态";
-childText.preferredSize.width = 80;
-childText.graphics.foregroundColor = childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+
+// 添加整体控制按钮
+var globalControlBtn = createStyledText(masterGroup, "整体控制", 70, true);
+globalControlBtn.helpTip = "选中图层时创建整体控制器，未选中时查找未控制图层";
 
 // 添加变量跟踪激活状态
 var masterActive = false;
 var childActive = false;
 
-// 添加整体控制按钮
-var globalControlBtn = masterGroup.add("statictext", undefined, "整体控制");
-globalControlBtn.helpTip = "选中图层时创建整体控制器，未选中时查找未控制图层";
-globalControlBtn.preferredSize.width = 80;
-globalControlBtn.graphics.foregroundColor = globalControlBtn.graphics.newPen(globalControlBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+// 添加整体控制按钮事件
 globalControlBtn.addEventListener('mouseover', function() {
     this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, [0.7, 0.7, 0.7, 1], 1);
 });
@@ -235,23 +441,13 @@ childText.addEventListener('mousedown', function(e) {
 var btnGroup = win.add("group");
 btnGroup.orientation = "row";
 btnGroup.alignment = "center";
-btnGroup.spacing = 10;
-btnGroup.margins = 15;
-btnGroup.spacing = 10;
+btnGroup.margins = [0, 10, 0, 6]; // 调整按钮组边距
+btnGroup.spacing = 12;
 
-// 创建可切换的主按钮
-var mainBtn = btnGroup.add("button", [0, 0, 80, 30], "开搞", {name: "ok"});
-mainBtn.helpTip = "左键点击执行\n右键点击切换模式";
-var isExpressionMode = false;
-
-// 创建可切换的取消按钮
-var cancelBtn = btnGroup.add("button", [0, 0, 80, 30], "取消", {name: "cancel"});
-cancelBtn.helpTip = "左键点击执行\n右键点击切换模式";
-var isClearMode = false;
-
-// 创建帮助按钮
-var helpBtn = btnGroup.add("button", [0, 0, 30, 30], "?", {name: "help"});
-helpBtn.helpTip = "点击查看使用说明";
+// 创建按钮
+var mainBtn = createStyledButton(btnGroup, "开搞", [85, 30], true);
+var cancelBtn = createStyledButton(btnGroup, "取消", [85, 30], false);
+var helpBtn = createStyledButton(btnGroup, "?", [30, 30], false);
 
 // 添加版本比较函数
 function compareVersions(current, latest) {
@@ -351,8 +547,6 @@ cancelBtn.addEventListener('mousedown', function(e) {
         e.preventDefault();
     }
 });
-
-
 
 // 计算所选图层的中心位置
 function calculateCenterPosition(layers) {
