@@ -746,7 +746,7 @@ function hasControllerExpressions(layer) {
 // 清除控制器功能
 function clearNullControl() {
     try {
-        app.beginUndoGroup("清除空对象控制器");
+        app.beginUndoGroup("清除表达式");
         
         var comp = app.project.activeItem;
         if (!comp || !(comp instanceof CompItem)) {
@@ -762,31 +762,31 @@ function clearNullControl() {
 
         for (var i = 0; i < selectedLayers.length; i++) {
             var layer = selectedLayers[i];
-            if (layer.parent && hasControllerExpressions(layer)) {
-                // 保存当前变换值
-                var currentRotation = layer.rotation.value;
-                var currentScale = layer.scale.value;
-                var currentOpacity = layer.opacity.value;
-                
-                // 清除表达式
-                if (layer.rotation.expression.indexOf('value - parent.transform.rotation') !== -1) {
+            
+            // 保存当前变换值
+            var currentRotation = layer.rotation.value;
+            var currentScale = layer.scale.value;
+            var currentOpacity = layer.opacity.value;
+            
+            // 清除表达式
+            try {
+                if (layer.rotation.expression) {
                     layer.rotation.expression = '';
                 }
-                if (layer.scale.expression.indexOf('parentScale = parent.transform.scale.value') !== -1) {
+                if (layer.scale.expression) {
                     layer.scale.expression = '';
                 }
-                if (layer.opacity.expression.indexOf('hasParent?parent.transform.opacity*parent.enabled:value') !== -1) {
+                if (layer.opacity.expression) {
                     layer.opacity.expression = '';
                 }
-                
-                // 移除父级关系
-                layer.parent = null;
-                
-                // 恢复变换值
-                layer.rotation.setValue(currentRotation);
-                layer.scale.setValue(currentScale);
-                layer.opacity.setValue(currentOpacity);
+            } catch (err) {
+                // 忽略表达式清除错误
             }
+            
+            // 恢复变换值
+            layer.rotation.setValue(currentRotation);
+            layer.scale.setValue(currentScale);
+            layer.opacity.setValue(currentOpacity);
         }
         
         app.endUndoGroup();
@@ -875,8 +875,9 @@ mainBtn.onClick = function() {
 cancelBtn.onClick = function() {
     if (isClearMode) {
         clearNullControl();
+    } else {
+        win.close();
     }
-    win.close();
 }
 
 // 显示面板
