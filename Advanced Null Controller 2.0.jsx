@@ -237,17 +237,15 @@ globalControlBtn.addEventListener('mousedown', function() {
         }
     }
 });
-// 添加右键点击事件处理
+// 修改右键点击事件处理
 masterText.addEventListener('mousedown', function(e) {
     if (e.button == 2) {  // 右键点击
         masterActive = !masterActive;
         childActive = false;  // 互斥逻辑
         
         // 更新视觉反馈
-        masterText.graphics.foregroundColor = masterActive ? 
-            masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [0.3, 0.8, 0.3, 1], 1) : 
-            masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
-        childText.graphics.foregroundColor = childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+        masterText.setActive(masterActive);
+        childText.setActive(false);
         
         e.preventDefault();
     }
@@ -259,10 +257,8 @@ childText.addEventListener('mousedown', function(e) {
         masterActive = false;  // 互斥逻辑
         
         // 更新视觉反馈
-        childText.graphics.foregroundColor = childActive ? 
-            childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [0.3, 0.8, 0.3, 1], 1) : 
-            childText.graphics.newPen(childText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
-        masterText.graphics.foregroundColor = masterText.graphics.newPen(masterText.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+        childText.setActive(childActive);
+        masterText.setActive(false);
         
         e.preventDefault();
     }
@@ -823,7 +819,7 @@ function showHelpPanel() {
     descGroup.alignChildren = "left";
     descGroup.margins = [10, 4, 10, 0]; // 减小底部边距
 
-    var descText = descGroup.add("statictext", undefined, "本脚本已经开源，可以去GitHub或Gitee查看项目，可以的话求求去爱发电支持下我！", {multiline: true});
+    var descText = descGroup.add("statictext", undefined, "本脚本已经开源，可以去GitHub或Gitee查看项目，可以的话求求去爱发电支持下我！获取更新和提交bug", {multiline: true});
     descText.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
     descText.graphics.foregroundColor = descText.graphics.newPen(descText.graphics.PenType.SOLID_COLOR, [0.9, 0.9, 0.9, 1], 1);
     descText.preferredSize.width = 380;
@@ -832,7 +828,7 @@ function showHelpPanel() {
     var linksGroup = helpDialog.add("group");
     linksGroup.orientation = "row";
     linksGroup.alignChildren = ["left", "center"];
-    linksGroup.margins = [10, 2, 0, 0]; // 减小顶部边距
+    linksGroup.margins = [10, 2, 0, 4]; // 减小顶部边距
 
     // 使用更通用的ASCII字符作为图标
     createLinkButton(linksGroup, "Bilibili", "₪", "https://space.bilibili.com/100881808");
@@ -926,6 +922,41 @@ function createStyledCheckbox(parent, text) {
     });
     
     return checkbox;
+}
+
+// 创建带样式的文本标签
+function createStyledText(parent, text, width, isClickable) {
+    var textLabel = parent.add("statictext", undefined, text);
+    textLabel.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 13);
+    textLabel.graphics.foregroundColor = textLabel.graphics.newPen(textLabel.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+    
+    if (width) {
+        textLabel.preferredSize.width = width;
+    }
+    
+    if (isClickable) {
+        // 添加鼠标事件
+        textLabel.addEventListener('mouseover', function() {
+            if (!this.isActive) {  // 只在非激活状态下改变颜色
+                this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, [0.7, 0.7, 0.7, 1], 1);
+            }
+        });
+        
+        textLabel.addEventListener('mouseout', function() {
+            if (!this.isActive) {  // 只在非激活状态下恢复颜色
+                this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+            }
+        });
+
+        // 添加设置激活状态的方法
+        textLabel.setActive = function(active) {
+            this.isActive = active;
+            this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, 
+                active ? [0.3, 0.8, 0.3, 1] : [1, 1, 1, 1], 1);
+        };
+    }
+    
+    return textLabel;
 }
 
 // 显示面板
