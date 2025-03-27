@@ -333,6 +333,27 @@ globalControlBtn.addEventListener('mousedown', function() {
     if (selectedLayers.length > 0) {
         app.beginUndoGroup("创建整体控制器");
         
+        // 检查锁定图层
+        var lockedLayers = [];
+        for (var i = 0; i < selectedLayers.length; i++) {
+            if (selectedLayers[i].locked) {
+                lockedLayers.push(selectedLayers[i]);
+            }
+        }
+
+        // 如果有锁定图层，询问用户是否继续
+        if (lockedLayers.length > 0) {
+            var confirmLocked = confirm("检测到" + lockedLayers.length + "个锁定图层，是否临时解锁这些图层以创建控制器？\n解锁后会自动恢复锁定状态。");
+            if (!confirmLocked) {
+                alert("操作已取消");
+                return;
+            }
+            // 临时解锁图层
+            for (var i = 0; i < lockedLayers.length; i++) {
+                lockedLayers[i].locked = false;
+            }
+        }
+
         // 过滤掉已经有父级的图层
         var validLayers = [];
         for (var i = 0; i < selectedLayers.length; i++) {
@@ -340,26 +361,36 @@ globalControlBtn.addEventListener('mousedown', function() {
                 validLayers.push(selectedLayers[i]);
             }
         }
-        
+
         if (validLayers.length === 0) {
             alert("请选择至少一个没有父级的图层！");
-            app.endUndoGroup();
+            // 恢复锁定状态
+            if (lockedLayers.length > 0) {
+                for (var i = 0; i < lockedLayers.length; i++) {
+                    lockedLayers[i].locked = true;
+                }
+            }
             return;
         }
+
+        selectedLayers = validLayers; // 更新选中图层列表
+        var nullSize = 100;
+        
+        // 解除原有父子关系
+        var originalParents = unlinkParents(selectedLayers);
         
         // 计算中心位置
-        var centerPosition = calculateCenterPosition(validLayers);
+        var centerPosition = calculateCenterPosition(selectedLayers);
         
         // 获取最上层的图层
-        var topMostLayer = validLayers[0];
-        validLayers.forEach(function(layer) {
+        var topMostLayer = selectedLayers[0];
+        selectedLayers.forEach(function(layer) {
             if (layer.index < topMostLayer.index) {
                 topMostLayer = layer;
             }
         });
         
         // 创建基础空对象
-        var nullSize = 100;
         var nullLayerName = "整体控制器";
         var ctrl = createNullObject(comp, nullLayerName, nullSize, centerPosition, topMostLayer);
         
@@ -543,6 +574,27 @@ function createNullControl() {
             return;
         }
 
+        // 检查锁定图层
+        var lockedLayers = [];
+        for (var i = 0; i < selectedLayers.length; i++) {
+            if (selectedLayers[i].locked) {
+                lockedLayers.push(selectedLayers[i]);
+            }
+        }
+
+        // 如果有锁定图层，询问用户是否继续
+        if (lockedLayers.length > 0) {
+            var confirmLocked = confirm("检测到" + lockedLayers.length + "个锁定图层，是否临时解锁这些图层以创建控制器？\n解锁后会自动恢复锁定状态。");
+            if (!confirmLocked) {
+                alert("操作已取消");
+                return;
+            }
+            // 临时解锁图层
+            for (var i = 0; i < lockedLayers.length; i++) {
+                lockedLayers[i].locked = false;
+            }
+        }
+
         // 过滤掉已经有父级的图层
         var validLayers = [];
         for (var i = 0; i < selectedLayers.length; i++) {
@@ -553,6 +605,12 @@ function createNullControl() {
 
         if (validLayers.length === 0) {
             alert("请选择至少一个没有父级的图层！");
+            // 恢复锁定状态
+            if (lockedLayers.length > 0) {
+                for (var i = 0; i < lockedLayers.length; i++) {
+                    lockedLayers[i].locked = true;
+                }
+            }
             return;
         }
 
