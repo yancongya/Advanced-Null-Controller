@@ -2,7 +2,7 @@
 
 # Advanced Null Controller
 
-![Version](https://img.shields.io/badge/version-2024.03.21-blue.svg)
+![Version](https://img.shields.io/badge/version-2024.03.27-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![After Effects](https://img.shields.io/badge/After%20Effects-CS6%2B-9999FF)
 
@@ -14,7 +14,7 @@
 
 ## 📦 项目概述
 
-Advanced Null Controller 是一个专为 After Effects 设计的高级空对象控制器脚本，它能帮助您更高效地管理图层动画。
+Advanced Null Controller 是一个专为 After Effects 设计的高级空对象控制器脚本，它能帮助您更高效地管理图层动画。通过智能的控制器系统和灵活的表达式，让您的动画制作更加便捷。
 
 - **仓库地址**：[GitHub](https://github.com/Tyc-github/Advanced-Null-Controller)
 - **支持版本**：After Effects CS6 及以上版本
@@ -27,9 +27,10 @@ Advanced Null Controller 是一个专为 After Effects 设计的高级空对象�
   - 自动在所选图层中心位置创建控制器
   - 支持多图层批量创建
   - 智能层级管理系统
+  - 自动处理锁定图层
 
 - **灵活属性控制**
-  - 位置控制
+  - 位置控制（自动居中）
   - 旋转控制（可选）
   - 缩放控制（可选）
   - 不透明度控制（可选）
@@ -39,12 +40,20 @@ Advanced Null Controller 是一个专为 After Effects 设计的高级空对象�
   - 基础控制器：直接控制单个图层
   - 子控制器：控制一组相关图层
   - 总控制器：统一管理所有子级
+  - 智能层级关系维护
 
 - **智能表达式系统**
   - 独立旋转控制
   - 独立缩放控制
   - 联动不透明度控制
   - 仅表达式模式支持
+  - 表达式清除功能
+
+- **整体控制功能**
+  - 自动查找未控制图层
+  - 批量创建控制器
+  - 智能位置计算
+  - 层级关系优化
 
 ## 🎮 使用指南
 
@@ -61,11 +70,28 @@ Advanced Null Controller 是一个专为 After Effects 设计的高级空对象�
 | 取消 | 关闭面板 | 切换到清除控制器模式 |
 | 帮助 | 查看使用说明 | - |
 
+### 高级选项
+- **总控制**
+  - 右键点击激活
+  - 创建总控制器
+  - 统一管理所有子级
+
+- **子控制**
+  - 右键点击激活
+  - 创建子级控制器
+  - 精细控制单个元素
+
+- **整体控制**
+  - 自动查找未控制图层
+  - 批量创建控制器
+  - 智能位置计算
+
 ### 进阶技巧
 - 使用总控制器实现整体动画
 - 通过子控制器微调单个元素
 - 利用表达式模式扩展现有控制器
 - 合理使用清除功能重置控制关系
+- 智能处理锁定图层
 
 ## ⚠️ 注意事项
 
@@ -73,6 +99,7 @@ Advanced Null Controller 是一个专为 After Effects 设计的高级空对象�
 - 清除功能会保留当前变换值
 - 建议定期保存工程文件
 - 遇到问题请通过 Issues 反馈
+- 锁定图层需要临时解锁才能创建控制器
 
 ## 🔄 工作流程
 
@@ -87,8 +114,26 @@ graph TD
     G -->|成功| H[创建控制器]
     G -->|失败| I[错误提示]
     F -->|清除模式| J[清除操作]
+    H --> K[智能层级管理]
+    K --> L[表达式设置]
+    L --> M[完成操作]
 ```
 
 ## 🤝 参与贡献
 
 欢迎提交 Issues 和 Pull Requests 来帮助改进这个项目！
+
+## 📝 更新日志
+
+### 2024.03.27
+- 优化UI界面设计
+- 改进帮助面板布局
+- 增强错误处理机制
+- 优化表达式系统
+- 完善文档说明
+
+### 2024.03.21
+- 初始版本发布
+- 实现基础控制器功能
+- 添加高级选项支持
+- 集成表达式系统
