@@ -219,7 +219,7 @@ function showHelpPanel() {
     addTitle("高级选项：");
     addContent("- 总控制：右键点击激活，添加一个总控制器");
     addContent("- 子控制：右键点击激活，添加一个子级控制器");
-    addContent("- 整体控制：选中图层时创建整体控制器，未选中时查找未控制图层");
+    addContent("- 整体选中：查找未控制图层，选中图层时创建整体控制器");
     
     addSeparator();
     
@@ -306,7 +306,7 @@ childText.helpTip = "再套一层控制子级的属性\n右键点击切换激活
 
 // 添加整体控制按钮
 var globalControlBtn = createStyledText(masterGroup, "整体控制", 70, true);
-globalControlBtn.helpTip = "选中图层时创建整体控制器，未选中时查找未控制图层";
+globalControlBtn.helpTip = "查找未控制图层，选中图层时创建整体控制器";
 
 // 添加变量跟踪激活状态
 var masterActive = false;
@@ -482,23 +482,49 @@ helpBtn.onClick = showHelpPanel;
 // 统一按钮文字颜色为白色
 mainBtn.textPen = cancelBtn.textPen = helpBtn.textPen = mainBtn.graphics.newPen(mainBtn.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
 
-// 添加主按钮右键菜单事件
+// 添加全局变量跟踪模式状态
+var isExpressionMode = false;
+var isClearMode = false;
+
+// 修改主按钮右键菜单事件
 mainBtn.addEventListener('mousedown', function(e) {
     if (e.button == 2) {  // 右键点击
         isExpressionMode = !isExpressionMode;
+        isClearMode = false;  // 互斥逻辑
         mainBtn.text = isExpressionMode ? "仅表达式" : "开搞";
+        cancelBtn.text = "取消";  // 重置取消按钮文本
         e.preventDefault();
     }
 });
 
-// 添加取消按钮右键菜单事件
+// 修改取消按钮右键菜单事件
 cancelBtn.addEventListener('mousedown', function(e) {
     if (e.button == 2) {  // 右键点击
         isClearMode = !isClearMode;
+        isExpressionMode = false;  // 互斥逻辑
         cancelBtn.text = isClearMode ? "清除" : "取消";
+        mainBtn.text = "开搞";  // 重置开搞按钮文本
         e.preventDefault();
     }
 });
+
+// 修改按钮点击事件
+mainBtn.onClick = function() {
+    if (isExpressionMode) {
+        addExpressionsOnly();
+    } else {
+        createNullControl();
+    }
+    win.close();
+}
+
+cancelBtn.onClick = function() {
+    if (isClearMode) {
+        clearNullControl();
+    } else {
+        win.close();
+    }
+}
 
 // 计算所选图层的中心位置
 function calculateCenterPosition(layers) {
@@ -859,24 +885,6 @@ function addExpressionsOnly() {
     } catch (err) {
         alert("添加表达式时发生错误：" + err.toString());
         return false;
-    }
-}
-
-// 修改按钮点击事件
-mainBtn.onClick = function() {
-    if (isExpressionMode) {
-        addExpressionsOnly();
-    } else {
-        createNullControl();
-    }
-    win.close();
-}
-
-cancelBtn.onClick = function() {
-    if (isClearMode) {
-        clearNullControl();
-    } else {
-        win.close();
     }
 }
 
