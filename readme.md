@@ -1,24 +1,21 @@
-<div align="center">
-
 # Advanced Null Controller
 
-![Version](https://img.shields.io/badge/version-2024.03.27-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![After Effects](https://img.shields.io/badge/After%20Effects-CS6%2B-9999FF)
-
 *一个强大的 After Effects 空对象控制器脚本*
-
-[查看流程图](assets/Advanced%20Null%20Controller.drawio.html) | [反馈问题](https://github.com/Tyc-github/Advanced-Null-Controller/issues)
-
-</div>
 
 ## 📦 项目概述
 
 Advanced Null Controller 是一个专为 After Effects 设计的高级空对象控制器脚本，它能帮助您更高效地管理图层动画。通过智能的控制器系统和灵活的表达式，让您的动画制作更加便捷。
 
-- **仓库地址**：[GitHub](https://github.com/Tyc-github/Advanced-Null-Controller)
+- **仓库地址**：GitHub https://github.com/Tyc-github/Advanced-Null-Controller
 - **支持版本**：After Effects CS6 及以上版本
 - **开源协议**：MIT
+
+## 🚀 快速开始
+
+1. 选择目标图层
+2. 运行脚本
+3. 选择控制属性
+4. 点击"开搞"创建控制器
 
 ## ✨ 核心功能
 
@@ -56,12 +53,6 @@ Advanced Null Controller 是一个专为 After Effects 设计的高级空对象�
   - 层级关系优化
 
 ## 🎮 使用指南
-
-### 快速开始
-1. 选择目标图层
-2. 运行脚本
-3. 选择控制属性
-4. 点击"开搞"创建控制器
 
 ### 按钮功能
 | 按钮 | 左键点击 | 右键点击 |
@@ -123,17 +114,8 @@ graph TD
 
 欢迎提交 Issues 和 Pull Requests 来帮助改进这个项目！
 
-## 📝 更新日志
+## 🔗 相关链接
 
-### 2024.03.27
-- 优化UI界面设计
-- 改进帮助面板布局
-- 增强错误处理机制
-- 优化表达式系统
-- 完善文档说明
-
-### 2024.03.21
-- 初始版本发布
-- 实现基础控制器功能
-- 添加高级选项支持
-- 集成表达式系统
+- [Bilibili](https://space.bilibili.com/100881808)
+- [小红书](https://www.xiaohongshu.com/user/profile/5c009931f7e8b962bb328c6d)
+- [爱发电](https://afdian.com/item/2c972f4608a411f09e8e52540025c377)

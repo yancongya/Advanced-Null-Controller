@@ -1,0 +1,19 @@
+# 忽略 frames 文件夹
+assets/frames/
+
+# 忽略 After Effects 项目文件
+*.aep
+*.aepx
+
+# 忽略系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 忽略日志文件
+*.log 
