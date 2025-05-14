@@ -673,10 +673,13 @@ function handleGlobalControlButtonClick() {
 }
 
 /**
- * @@@ JSDOC_MARKER_FOR_NEW_FUNCTION @@@
  * [层层空] 为每个选定的图层添加一个单独的父级空对象。
  * 将选中图层的父级链接更改为新创建的空对象。
  * 每个图层创建独立的父级空对象，与整体控制不同。
+ * - 获取当前选中的图层并处理3D状态。
+ * - 根据放置模式决定空对象在图层上方或合成顶部。
+ * - 保留原始父级关系链（如果原图层有父级）。
+ * - 自动选中所有新创建的空对象。
  * @param {Boolean} placeMode 空对象放置模式，true=保持在原图层上一层, false=合成顶部
  * @returns {Boolean} 操作是否成功。
  */
