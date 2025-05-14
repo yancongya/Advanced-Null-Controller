@@ -1,0 +1,22 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 高级空对象控制器脚本指南
+
+本指南概述了“高级空对象控制器”脚本，并指引查阅其函数的详细文档。
+
+## 主脚本文件
+“高级空对象控制器”的核心逻辑位于：
+- [Advanced Null Controller 2.1.jsx](mdc:Advanced Null Controller 2.1.jsx)
+
+## 函数文档
+关于“高级空对象控制器”脚本中每个函数的详细说明，包括其用途、参数和返回值，请参阅专门的文档文件：
+- [AdvancedNullController_Functions.md](mdc:AdvancedNullController_Functions.md)
+
+**对AI的指示：**
+- 当被问及“高级空对象控制器”脚本中特定函数的功能时，请首先查阅 `AdvancedNullController_Functions.md`。
+- 如果向“高级空对象控制器”脚本中添加了新函数，或对现有函数进行了重大修改，请确保相应地使用新的/修订的JSDoc注释和函数签名更新 `AdvancedNullController_Functions.md`。
+- “高级空对象控制器”脚本中直接包含的JSDoc注释也应保持同步。
+
