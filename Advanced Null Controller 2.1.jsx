@@ -1081,6 +1081,94 @@ function showHelpPanel() {
     helpDialog.show();
 }
 
+/**
+ * 选择指定图层的子级图层。
+ * 查找选中图层的直接子级，并将其选中。
+ * 按住Shift键可以保留当前选择并添加子级。
+ * @returns {Boolean} 操作是否成功。
+ */
+function selectChildrenLayers() {
+    function logDebug(message) {
+        $.writeln("[选择子级] " + message);
+    }
+
+    try {
+        // 获取当前活动合成
+        var comp = app.project.activeItem;
+        if (!comp || !(comp instanceof CompItem)) {
+            alert("请先选择一个合成!");
+            return false;
+        }
+
+        logDebug("当前合成: " + comp.name);
+
+        // 获取当前选中的图层
+        var selectedLayers = comp.selectedLayers;
+        if (selectedLayers.length === 0) {
+            alert("请先选择至少一个图层!");
+            return false;
+        }
+
+        logDebug("选中的图层数量: " + selectedLayers.length);
+
+        // 创建一个对象，用于存储选中图层的索引，便于快速查找
+        var selectedLayersMap = {};
+        for (var i = 0; i < selectedLayers.length; i++) {
+            selectedLayersMap[selectedLayers[i].index] = true;
+        }
+
+        // 查找所有子级图层
+        var childrenLayers = [];
+        var foundCount = 0;
+
+        // 遍历合成中的所有图层
+        for (var i = 1; i <= comp.numLayers; i++) {
+            var layer = comp.layer(i);
+            
+            // 检查该图层是否有父级，且父级是否在选中图层中
+            if (layer.parent !== null && selectedLayersMap[layer.parent.index]) {
+                childrenLayers.push(layer);
+                foundCount++;
+                logDebug("找到子级图层: " + layer.name + " (父级: " + layer.parent.name + ")");
+            }
+        }
+
+        // 如果没有找到任何子级
+        if (foundCount === 0) {
+            alert("选中的图层没有子级!");
+            return false;
+        }
+
+        // 选择所有找到的子级图层
+        app.beginUndoGroup("选择子级图层");
+        
+        // 如果按住Shift键，则保持当前选择
+        var keepCurrentSelection = ScriptUI.environment.keyboardState.shiftKey;
+        
+        if (!keepCurrentSelection) {
+            // 先取消所有图层的选择
+            for (var i = 1; i <= comp.numLayers; i++) {
+                comp.layer(i).selected = false;
+            }
+        }
+        
+        // 选中所有子级图层
+        for (var i = 0; i < childrenLayers.length; i++) {
+            childrenLayers[i].selected = true;
+        }
+        
+        app.endUndoGroup();
+        
+        // 记录到日志
+        logDebug("已选中 " + foundCount + " 个子级图层");
+        return true;
+        
+    } catch (err) {
+        alert("执行脚本时发生错误: " + err.toString());
+        logDebug("执行脚本时发生错误: " + err.toString());
+        return false;
+    }
+}
 
 // --- 主面板创建和UI布局 ---
 var win = new Window("dialog", "Advanced Null Controller by 烟囱");
@@ -1163,7 +1251,10 @@ var globalControlBtn = createStyledText(toolsGroup, "整体控制", 70, true);
 globalControlBtn.helpTip = "未选中:查找未控图层 | 选中时:创建整体控制器";
 
 var layeredNullsBtn = createStyledText(toolsGroup, "层层空", 70, true);
-layeredNullsBtn.helpTip = "空对象位于原图层上方\nCTRL+点击：空对象位于合成顶部";
+layeredNullsBtn.helpTip = "每个选中层都创建一个空对象\n默认空对象位于原图层上方\nCTRL+点击：空对象位于合成顶部";
+
+var selectChildrenBtn = createStyledText(toolsGroup, "选择子级", 70, true);
+selectChildrenBtn.helpTip = "选择当前选中图层的所有子级\nShift+点击：保留当前选择并添加子级";
 
 // --- 事件监听器绑定 ---
 globalControlBtn.addEventListener('mousedown', function(e) {
@@ -1189,6 +1280,22 @@ layeredNullsBtn.addEventListener('mousedown', function(e) {
         // 如果按下Ctrl键，则传递false作为placeMode参数（空对象位于合成顶部）
         // 否则使用默认的true（空对象位于原图层上方）
         createLayeredNulls_modular(!ctrlKey);
+    }
+});
+
+selectChildrenBtn.addEventListener('mousedown', function(e) {
+    if (e.button == 0 || e.button == undefined) { // Left click
+        selectChildrenLayers();
+    }
+});
+selectChildrenBtn.addEventListener('mouseover', function() {
+    if (!this.isActive) {
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, [0.7, 0.7, 0.7, 1], 1);
+    }
+});
+selectChildrenBtn.addEventListener('mouseout', function() {
+    if (!this.isActive) {
+        this.graphics.foregroundColor = this.graphics.newPen(this.graphics.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
     }
 });
 
