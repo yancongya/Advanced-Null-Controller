@@ -1171,7 +1171,7 @@ function selectChildrenLayers() {
 }
 
 // --- 主面板创建和UI布局 ---
-var win = new Window("dialog", "Advanced Null Controller by 烟囱");
+var win = new Window("palette", "Advanced Null Controller by 烟囱");
 win.orientation = "column";
 win.alignChildren = "fill";
 win.spacing = 12;
@@ -1203,16 +1203,16 @@ mainOptionsGroup.spacing = 10;
 mainOptionsGroup.margins = [0, 2, 0, 2];
 
 var optionsGroup = createStyledPanel(mainOptionsGroup, "选择要添加的控制");
-optionsGroup.orientation = "row";
+optionsGroup.orientation = "column";
 optionsGroup.alignChildren = ["center", "center"];
-optionsGroup.margins = [12, 20, 12, 16];
-optionsGroup.spacing = 20;
+optionsGroup.margins = [12, 14, 12, 14];
+optionsGroup.spacing = 10;
 
 var checkboxGroup = optionsGroup.add("group");
 checkboxGroup.orientation = "row";
 checkboxGroup.alignChildren = ["center", "center"];
 checkboxGroup.spacing = 20;
-checkboxGroup.margins = [0, 4, 0, 0];
+checkboxGroup.margins = [0, 2, 0, 2];
 
 var rotateCheck = createStyledCheckbox(checkboxGroup, "旋转");
 var scaleCheck = createStyledCheckbox(checkboxGroup, "缩放");
@@ -1221,20 +1221,17 @@ rotateCheck.value = true;
 scaleCheck.value = true;
 opacityCheck.value = true;
 
-var advancedGroup = createStyledPanel(mainOptionsGroup, "高级控制");
-advancedGroup.orientation = "row";
-advancedGroup.alignChildren = ["center", "center"];
-advancedGroup.margins = [10, 12, 10, 12];
+// 添加新的控制组，用于放置总控制和子控制按钮
+var advancedControlGroup = optionsGroup.add("group");
+advancedControlGroup.orientation = "row";
+advancedControlGroup.alignment = "center";
+advancedControlGroup.alignChildren = ["center", "center"];
+advancedControlGroup.spacing = 30;
+advancedControlGroup.margins = [0, 2, 0, 2];
 
-var masterGroup = advancedGroup.add("group");
-masterGroup.orientation = "row";
-masterGroup.alignment = "center";
-masterGroup.alignChildren = ["center", "center"];
-masterGroup.spacing = 30;
-
-var masterText = createStyledText(masterGroup, "总控制", 70, true);
+var masterText = createStyledText(advancedControlGroup, "总控制", 70, true);
 masterText.helpTip = "再套一层控制作为总控\n右键点击切换激活状态";
-var childText = createStyledText(masterGroup, "子控制", 70, true);
+var childText = createStyledText(advancedControlGroup, "子控制", 70, true);
 childText.helpTip = "再套一层控制子级的属性\n右键点击切换激活状态";
 
 var advancedToolsGroup = createStyledPanel(mainOptionsGroup, "高级工具");
