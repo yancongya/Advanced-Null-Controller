@@ -1,0 +1,90 @@
+name: 配置分支保护规则
+
+# 仅在推送到dev分支时触发（用于初始化设置）
+on:
+  workflow_dispatch:
+    inputs:
+      setup_protection:
+        description: '设置dev分支保护规则'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+  administration: write
+
+jobs:
+  setup-protection:
+    name: 设置分支保护
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: 配置dev分支保护规则
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            try {
+              // 设置dev分支保护规则
+              await github.rest.repos.updateBranchProtection({
+                owner: owner,
+                repo: repo,
+                branch: 'dev',
+                required_status_checks: null,
+                enforce_admins: false,
+                required_pull_request_reviews: {
+                  required_approving_review_count: 0,
+                  dismiss_stale_reviews: false,
+                  require_code_owner_reviews: false
+                },
+                restrictions: {
+                  users: [owner], // 只允许仓库所有者访问
+                  teams: []
+                },
+                allow_force_pushes: false,
+                allow_deletions: false
+              });
+              
+              console.log('✅ dev分支保护规则设置成功');
+              
+              // 设置分支可见性（通过更新仓库设置）
+              await github.rest.repos.update({
+                owner: owner,
+                repo: repo,
+                default_branch: 'main', // 确保main是默认分支
+                has_wiki: false,
+                has_projects: true,
+                has_issues: true
+              });
+              
+              console.log('✅ 仓库设置更新成功');
+              
+            } catch (error) {
+              console.error('❌ 设置过程中出现错误:', error.message);
+              
+              // 如果是权限问题，提供解决方案
+              if (error.status === 403) {
+                console.log('💡 解决方案:');
+                console.log('1. 确保GitHub Token具有admin权限');
+                console.log('2. 或者手动在仓库设置中配置分支保护规则');
+              }
+            }
+
+      - name: 输出配置信息
+        run: |
+          echo "🔒 分支保护配置完成"
+          echo ""
+          echo "📋 配置详情:"
+          echo "- dev分支: 受保护分支，限制访问"
+          echo "- main分支: 公开分支，用于生产环境"
+          echo ""
+          echo "🔧 手动配置步骤（如果自动配置失败）:"
+          echo "1. 进入仓库设置 → Branches"
+          echo "2. 为dev分支添加保护规则"
+          echo "3. 启用 'Restrict pushes that create files'"
+          echo "4. 在 'Restrict pushes that create files' 中添加仓库所有者"

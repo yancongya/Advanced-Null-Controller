@@ -1,0 +1,195 @@
+name: 同步dev分支到main分支
+
+# 手动触发机制
+on:
+  workflow_dispatch:
+    inputs:
+      commit_message:
+        description: '自定义提交消息（可选）'
+        required: false
+        default: '同步dev分支的更改到main分支'
+        type: string
+      force_sync:
+        description: '强制同步（忽略冲突警告）'
+        required: false
+        default: false
+        type: boolean
+
+# 权限配置
+permissions:
+  contents: write
+  actions: read
+  pull-requests: write
+
+jobs:
+  sync-branches:
+    name: 同步分支
+    runs-on: ubuntu-latest
+    
+    # 确保只能在dev分支上运行
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史记录
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 配置Git用户
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+      
+      - name: 检查分支状态
+        run: |
+          echo "当前分支: $(git branch --show-current)"
+          echo "dev分支最新提交: $(git rev-parse HEAD)"
+          git checkout main
+          echo "main分支最新提交: $(git rev-parse HEAD)"
+          git checkout dev
+      
+      - name: 创建临时工作分支
+        run: |
+          # 创建临时分支用于同步操作
+          TEMP_BRANCH="temp-sync-$(date +%Y%m%d-%H%M%S)"
+          echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV
+          git checkout -b $TEMP_BRANCH
+      
+      - name: 准备同步文件
+        run: |
+          echo "准备同步的文件列表..."
+          
+          # 创建临时目录存储要同步的文件
+          mkdir -p /tmp/sync-files
+          
+          # 复制核心文件（排除assets/和dev/文件夹）
+          # 复制.jsx脚本文件（如果在根目录）
+          find . -maxdepth 1 -name "*.jsx" -type f | while read file; do
+            if [ -f "$file" ]; then
+              cp "$file" "/tmp/sync-files/"
+              echo "已准备同步: $file"
+            fi
+          done
+          
+          # 复制readme.md
+          if [ -f "readme.md" ]; then
+            cp "readme.md" "/tmp/sync-files/"
+            echo "已准备同步: readme.md"
+          fi
+          
+          # 复制.gitignore（main分支版本）
+          git checkout main
+          if [ -f ".gitignore" ]; then
+            cp ".gitignore" "/tmp/sync-files/"
+            echo "已准备同步: .gitignore (main分支版本)"
+          fi
+          git checkout $TEMP_BRANCH
+          
+          # 复制其他重要配置文件
+          for file in "*.json" "*.md" "*.txt" "*.yml" "*.yaml"; do
+            find . -maxdepth 1 -name "$file" -type f | while read f; do
+              if [ -f "$f" ] && [[ "$f" != "./readme.md" ]]; then
+                cp "$f" "/tmp/sync-files/"
+                echo "已准备同步: $f"
+              fi
+            done
+          done
+          
+          echo "同步文件准备完成"
+          ls -la /tmp/sync-files/
+      
+      - name: 切换到main分支并应用更改
+        run: |
+          # 切换到main分支
+          git checkout main
+          
+          # 备份当前main分支状态
+          git tag backup-main-$(date +%Y%m%d-%H%M%S)
+          
+          # 复制准备好的文件到main分支
+          if [ -d "/tmp/sync-files" ]; then
+            cp -r /tmp/sync-files/* . 2>/dev/null || true
+          fi
+          
+          # 检查是否有更改
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "没有检测到需要同步的更改"
+            echo "SYNC_NEEDED=false" >> $GITHUB_ENV
+          else
+            echo "检测到需要同步的更改"
+            echo "SYNC_NEEDED=true" >> $GITHUB_ENV
+            git add .
+          fi
+      
+      - name: 提交更改到main分支
+        if: env.SYNC_NEEDED == 'true'
+        run: |
+          # 使用自定义提交消息或默认消息
+          COMMIT_MSG="${{ github.event.inputs.commit_message }}"
+          if [ -z "$COMMIT_MSG" ]; then
+            COMMIT_MSG="同步dev分支的更改到main分支"
+          fi
+          
+          # 添加同步信息到提交消息
+          FULL_MSG="$COMMIT_MSG
+
+          同步信息:
+          - 源分支: dev
+          - 同步时间: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          - 触发者: ${{ github.actor }}
+          - 工作流运行: ${{ github.run_id }}"
+          
+          git commit -m "$FULL_MSG"
+          echo "已提交更改到main分支"
+      
+      - name: 推送main分支更改
+        if: env.SYNC_NEEDED == 'true'
+        run: |
+          git push origin main
+          echo "已推送main分支更改到远程仓库"
+      
+      - name: 清理临时分支
+        if: always()
+        run: |
+          # 切换回dev分支
+          git checkout dev
+          
+          # 删除临时分支
+          if [ ! -z "$TEMP_BRANCH" ]; then
+            git branch -D $TEMP_BRANCH 2>/dev/null || true
+          fi
+          
+          # 清理临时文件
+          rm -rf /tmp/sync-files
+      
+      - name: 输出同步结果
+        run: |
+          if [ "$SYNC_NEEDED" == "true" ]; then
+            echo "✅ 同步完成！dev分支的更改已成功同步到main分支"
+            echo "📝 提交消息: ${{ github.event.inputs.commit_message }}"
+            echo "🔗 查看main分支: https://github.com/${{ github.repository }}/tree/main"
+          else
+            echo "ℹ️ 没有需要同步的更改"
+          fi
+          
+          echo "🌿 当前分支状态:"
+          git checkout main
+          echo "main分支最新提交: $(git log -1 --oneline)"
+          git checkout dev
+          echo "dev分支最新提交: $(git log -1 --oneline)"
+      
+      - name: 错误处理
+        if: failure()
+        run: |
+          echo "❌ 同步过程中发生错误"
+          echo "请检查工作流日志以获取详细信息"
+          echo "如果遇到合并冲突，请手动解决后重新运行工作流"
+          
+          # 尝试恢复到安全状态
+          git checkout dev 2>/dev/null || true
+          
+          # 清理可能的临时分支
+          if [ ! -z "$TEMP_BRANCH" ]; then
+            git branch -D $TEMP_BRANCH 2>/dev/null || true
+          fi
