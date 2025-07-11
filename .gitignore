@@ -1,5 +1,6 @@
-# 忽略 frames 文件夹
-assets/frames/
+# 生产分支忽略规则 - 排除开发资源文件
+assets/
+dev/
 
 # 忽略 After Effects 项目文件
 *.aep
@@ -16,4 +17,4 @@ Thumbs.db
 *.swo
 
 # 忽略日志文件
-*.log 
+*.log
