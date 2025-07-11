@@ -3,6 +3,7 @@
 // Author: 烟囱
 // Repository: https://github.com/Tyc-github/Advanced-Null-Controller
 
+
 // 定义仓库链接
 var GITHUB_URL = "https://github.com/Tyc-github/Advanced-Null-Controller";
 var GITEE_URL = "https://gitee.com/itycon/Advanced-Null-Controller";
@@ -294,31 +295,71 @@ function unlinkParents(layers) {
  * @param {Boolean} applyOpacity 是否应用不透明度表达式。
  */
 function applyExpressionsToLayer(layer, applyRotate, applyScale, applyOpacity) {
-    if (!layer || !layer.isValid) return;
+    if (!layer || !layer.isValid) {
+        $.writeln("applyExpressionsToLayer: 图层无效或不存在");
+        return;
+    }
+
+    $.writeln("applyExpressionsToLayer: 开始处理图层 '" + layer.name + "'");
+    $.writeln("  - 3D图层: " + layer.threeDLayer);
+    $.writeln("  - applyRotate: " + applyRotate);
+    $.writeln("  - applyScale: " + applyScale);
+    $.writeln("  - applyOpacity: " + applyOpacity);
 
     try {
-        var rProp = layer.property("Rotation") || layer.property("Z Rotation");
-        if (applyRotate && rProp && rProp.canSetExpression) {
-             if (layer.threeDLayer && layer.property("Z Rotation")) {
-                rProp.expression = 'value - parent.transform.zRotation';
-            } else if (!layer.threeDLayer && layer.property("Rotation")){
-                rProp.expression = 'value - parent.transform.rotation';
+        // 处理旋转表达式
+        if (applyRotate) {
+            $.writeln("  - 开始处理旋转表达式");
+            if (layer.threeDLayer) {
+                // 3D图层使用Z旋转
+                var zRotProp = layer.property("Z Rotation");
+                if (zRotProp && zRotProp.canSetExpression) {
+                    zRotProp.expression = 'value - parent.transform.zRotation';
+                    $.writeln("  - 已为3D图层添加Z旋转表达式");
+                } else {
+                    $.writeln("  - 3D图层Z旋转属性不可用或无法设置表达式");
+                }
+            } else {
+                // 2D图层使用旋转
+                if (layer.rotation && layer.rotation.canSetExpression) {
+                    layer.rotation.expression = 'value - parent.transform.rotation';
+                    $.writeln("  - 已为2D图层添加旋转表达式");
+                } else {
+                    $.writeln("  - 2D图层旋转属性不可用或无法设置表达式");
+                }
             }
         }
 
-        if (applyScale && layer.property("Scale") && layer.property("Scale").canSetExpression) {
-            layer.property("Scale").expression = 's = [];\n' +
-                'parentScale = parent.transform.scale.value;\n' +
-                'for (i = 0; i < parentScale.length; i++){\n' +
-                's[i] = (parentScale[i]== 0) ? 0 : value[i]*100/parentScale[i];\n' +
-                '}\n' +
-                's';
+        // 处理缩放表达式
+        if (applyScale) {
+            $.writeln("  - 开始处理缩放表达式");
+            if (layer.scale && layer.scale.canSetExpression) {
+                layer.scale.expression = 's = [];\n' +
+                    'parentScale = parent.transform.scale.value;\n' +
+                    'for (i = 0; i < parentScale.length; i++){\n' +
+                    's[i] = (parentScale[i]== 0) ? 0 : value[i]*100/parentScale[i];\n' +
+                    '}\n' +
+                    's';
+                $.writeln("  - 已添加缩放表达式");
+            } else {
+                $.writeln("  - 缩放属性不可用或无法设置表达式");
+            }
         }
-        if (applyOpacity && layer.property("Opacity") && layer.property("Opacity").canSetExpression) {
-            layer.property("Opacity").expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
+
+        // 处理不透明度表达式
+        if (applyOpacity) {
+            $.writeln("  - 开始处理不透明度表达式");
+            if (layer.opacity && layer.opacity.canSetExpression) {
+                layer.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
+                $.writeln("  - 已添加不透明度表达式");
+            } else {
+                $.writeln("  - 不透明度属性不可用或无法设置表达式");
+            }
         }
+
+        $.writeln("applyExpressionsToLayer: 完成处理图层 '" + layer.name + "'");
     } catch (e) {
-        // Error handling for expression application can be added here if needed
+        $.writeln("applyExpressionsToLayer: 处理图层时发生错误: " + e.toString());
             }
         }
 
@@ -331,15 +372,27 @@ function hasControllerExpressions(layer) {
     if (!layer || !layer.isValid) return false;
     var hasExpressions = false;
     try {
-        var rProp = layer.property("Rotation") || layer.property("Z Rotation");
-        if (rProp && rProp.expression) {
-            hasExpressions = hasExpressions || rProp.expression.indexOf('parent.transform.rotation') !== -1 || rProp.expression.indexOf('parent.transform.zRotation') !== -1;
+        // 检查旋转表达式
+        if (layer.threeDLayer) {
+            // 3D图层检查Z旋转
+            if (layer.property("Z Rotation") && layer.property("Z Rotation").expression) {
+                hasExpressions = hasExpressions || layer.property("Z Rotation").expression.indexOf('parent.transform.zRotation') !== -1;
+            }
+        } else {
+            // 2D图层检查旋转
+            if (layer.rotation && layer.rotation.expression) {
+                hasExpressions = hasExpressions || layer.rotation.expression.indexOf('parent.transform.rotation') !== -1;
+            }
         }
-        if (layer.property("Scale") && layer.property("Scale").expression) {
-            hasExpressions = hasExpressions || layer.property("Scale").expression.indexOf('parent.transform.scale.value') !== -1;
+
+        // 检查缩放表达式
+        if (layer.scale && layer.scale.expression) {
+            hasExpressions = hasExpressions || layer.scale.expression.indexOf('parent.transform.scale.value') !== -1;
         }
-        if (layer.property("Opacity") && layer.property("Opacity").expression) {
-            hasExpressions = hasExpressions || layer.property("Opacity").expression.indexOf('parent.transform.opacity') !== -1;
+
+        // 检查不透明度表达式
+        if (layer.opacity && layer.opacity.expression) {
+            hasExpressions = hasExpressions || layer.opacity.expression.indexOf('parent.transform.opacity') !== -1;
         }
     } catch (err) {
         return false;
@@ -452,8 +505,41 @@ function createNullControl() {
         }
 
         for (var i = 0; i < selectedLayers.length; i++) {
-            selectedLayers[i].parent = base_ctrl;
-            applyExpressionsToLayer(selectedLayers[i], rotateCheck.value, scaleCheck.value, opacityCheck.value);
+            var layer = selectedLayers[i];
+            layer.parent = base_ctrl;  // 始终绑定到基础控制器
+
+            // 直接添加表达式控制，使用2.0版本的逻辑
+            if (rotateCheck.value) {
+                try {
+                    layer.rotation.expression = 'value - parent.transform.rotation';
+                    $.writeln("已为图层 '" + layer.name + "' 添加旋转表达式");
+                } catch (err) {
+                    $.writeln("为图层 '" + layer.name + "' 添加旋转表达式时出错: " + err.toString());
+                }
+            }
+
+            if (scaleCheck.value) {
+                try {
+                    layer.scale.expression = 's = [];\n' +
+                        'parentScale = parent.transform.scale.value;\n' +
+                        'for (i = 0; i < parentScale.length; i++){\n' +
+                        's[i] = (parentScale[i]== 0) ? 0 : value[i]*100/parentScale[i];\n' +
+                        '}\n' +
+                        's';
+                    $.writeln("已为图层 '" + layer.name + "' 添加缩放表达式");
+                } catch (err) {
+                    $.writeln("为图层 '" + layer.name + "' 添加缩放表达式时出错: " + err.toString());
+                }
+            }
+
+            if (opacityCheck.value) {
+                try {
+                    layer.opacity.expression = 'hasParent?parent.transform.opacity*parent.enabled:value';
+                    $.writeln("已为图层 '" + layer.name + "' 添加不透明度表达式");
+                } catch (err) {
+                    $.writeln("为图层 '" + layer.name + "' 添加不透明度表达式时出错: " + err.toString());
+                }
+            }
         }
         
         restoreLockedLayers(layersToRestoreLock);
@@ -477,59 +563,43 @@ function createNullControl() {
  * @returns {Boolean} 操作是否成功。
  */
 function clearNullControl() {
-    var comp = getActiveComp();
-    if (!comp) return false;
-
-    var selectedLayers = getSelectedLayersWithValidation(comp);
-    if (!selectedLayers) return false;
-
-    app.beginUndoGroup("清除表达式和父级");
     try {
+        app.beginUndoGroup("清除表达式");
+
+        var comp = app.project.activeItem;
+        if (!comp || !(comp instanceof CompItem)) {
+            alert("请选择合成！");
+            return false;
+        }
+
+        var selectedLayers = comp.selectedLayers;
+        if (selectedLayers.length === 0) {
+            alert("请选择至少一个图层！");
+            return false;
+        }
+
         for (var i = 0; i < selectedLayers.length; i++) {
             var layer = selectedLayers[i];
-            if (!layer || !layer.isValid) continue;
 
-            var transform = layer.property("Transform");
-            var savedValues = {};
-
-            if (transform) {
-                if (transform.property("Rotation") && transform.property("Rotation").numKeys === 0) savedValues.rotation = transform.property("Rotation").value;
-                if (transform.property("X Rotation") && transform.property("X Rotation").numKeys === 0) savedValues.xRotation = transform.property("X Rotation").value;
-                if (transform.property("Y Rotation") && transform.property("Y Rotation").numKeys === 0) savedValues.yRotation = transform.property("Y Rotation").value;
-                if (transform.property("Z Rotation") && transform.property("Z Rotation").numKeys === 0) savedValues.zRotation = transform.property("Z Rotation").value;
-                if (transform.property("Orientation") && transform.property("Orientation").numKeys === 0) savedValues.orientation = transform.property("Orientation").value;
-                if (transform.property("Scale") && transform.property("Scale").numKeys === 0) savedValues.scale = transform.property("Scale").value;
-                if (transform.property("Opacity") && transform.property("Opacity").numKeys === 0) savedValues.opacity = transform.property("Opacity").value;
-        }
-        
-            if (transform) {
-                if (transform.property("Rotation") && transform.property("Rotation").canSetExpression) transform.property("Rotation").expression = '';
-                if (transform.property("X Rotation") && transform.property("X Rotation").canSetExpression) transform.property("X Rotation").expression = '';
-                if (transform.property("Y Rotation") && transform.property("Y Rotation").canSetExpression) transform.property("Y Rotation").expression = '';
-                if (transform.property("Z Rotation") && transform.property("Z Rotation").canSetExpression) transform.property("Z Rotation").expression = '';
-                if (transform.property("Orientation") && transform.property("Orientation").canSetExpression) transform.property("Orientation").expression = '';
-                if (transform.property("Scale") && transform.property("Scale").canSetExpression) transform.property("Scale").expression = '';
-                if (transform.property("Opacity") && transform.property("Opacity").canSetExpression) transform.property("Opacity").expression = '';
+            // 清除表达式
+            try {
+                if (layer.rotation.expression) {
+                    layer.rotation.expression = '';
+                }
+                if (layer.scale.expression) {
+                    layer.scale.expression = '';
+                }
+                if (layer.opacity.expression) {
+                    layer.opacity.expression = '';
+                }
+            } catch (err) {
+                // 忽略表达式清除错误
             }
-            
-             if (transform) {
-                if (savedValues.rotation !== undefined && transform.property("Rotation")) transform.property("Rotation").setValue(savedValues.rotation);
-                if (savedValues.xRotation !== undefined && transform.property("X Rotation")) transform.property("X Rotation").setValue(savedValues.xRotation);
-                if (savedValues.yRotation !== undefined && transform.property("Y Rotation")) transform.property("Y Rotation").setValue(savedValues.yRotation);
-                if (savedValues.zRotation !== undefined && transform.property("Z Rotation")) transform.property("Z Rotation").setValue(savedValues.zRotation);
-                if (savedValues.orientation !== undefined && transform.property("Orientation")) transform.property("Orientation").setValue(savedValues.orientation);
-                if (savedValues.scale !== undefined && transform.property("Scale")) transform.property("Scale").setValue(savedValues.scale);
-                if (savedValues.opacity !== undefined && transform.property("Opacity")) transform.property("Opacity").setValue(savedValues.opacity);
-            }
+        }
 
-            if (layer.parent !== null) {
-                layer.parent = null;
-        }
-        }
         app.endUndoGroup();
         return true;
     } catch (err) {
-        alert("清除时发生错误：" + err.toString());
         app.endUndoGroup();
         return false;
     }
@@ -937,28 +1007,64 @@ function showHelpPanel() {
     var helpDialog = new Window("dialog", "使用说明");
     helpDialog.orientation = "column";
     helpDialog.alignChildren = "fill";
-    helpDialog.margins = 14;
-    helpDialog.spacing = 8;
-    
+    helpDialog.margins = 12;
+    helpDialog.spacing = 6;
+    helpDialog.preferredSize.width = 450;
+    helpDialog.preferredSize.height = 550;
+
+    // 添加标题区域
+    var headerGroup = helpDialog.add("group");
+    headerGroup.orientation = "column";
+    headerGroup.alignChildren = ["center", "center"];
+    headerGroup.margins = [0, 16, 0, 16];
+
+    // 主标题
+    var titleText = headerGroup.add("statictext", undefined, "Advanced Null Controller v2.1");
+    titleText.alignment = "center";
+    titleText.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 16);
+    titleText.graphics.foregroundColor = titleText.graphics.newPen(titleText.graphics.PenType.SOLID_COLOR, [0.3, 0.6, 0.9, 1], 1);
+
+    // 作者信息
+    var authorText = headerGroup.add("statictext", undefined, "by 烟囱");
+    authorText.alignment = "center";
+    authorText.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+    authorText.graphics.foregroundColor = authorText.graphics.newPen(authorText.graphics.PenType.SOLID_COLOR, [0.7, 0.7, 0.7, 1], 1);
+
+    // 分隔线
+    var separator = helpDialog.add("panel");
+    separator.alignment = "fill";
+    separator.height = 1;
+    separator.margins = [20, 0, 20, 8];
+
+    // 创建滚动面板
+    var scrollPanel = helpDialog.add("panel");
+    scrollPanel.alignment = "fill";
+    scrollPanel.orientation = "column";
+    scrollPanel.alignChildren = "fill";
+    scrollPanel.margins = 8;
+    scrollPanel.spacing = 4;
+
     function addTitle(text) {
-        var title = helpDialog.add("statictext", undefined, text);
-        title.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 13);
+        var title = scrollPanel.add("statictext", undefined, text);
+        title.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.BOLD, 12);
         title.graphics.foregroundColor = title.graphics.newPen(title.graphics.PenType.SOLID_COLOR, [0.3, 0.6, 0.9, 1], 1);
+        title.margins = [0, 4, 0, 2];
         return title;
     }
-    
+
     function addContent(text) {
-        var content = helpDialog.add("statictext", undefined, text);
-        content.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
+        var content = scrollPanel.add("statictext", undefined, text);
+        content.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 11);
         content.graphics.foregroundColor = content.graphics.newPen(content.graphics.PenType.SOLID_COLOR, [0.9, 0.9, 0.9, 1], 1);
-        content.margins = [10, 0, 0, 0];
+        content.margins = [8, 0, 0, 1];
         return content;
     }
-    
+
     function addSeparator() {
-        var separator = helpDialog.add("panel");
+        var separator = scrollPanel.add("panel");
         separator.alignment = "fill";
         separator.height = 1;
+        separator.margins = [0, 3, 0, 3];
         return separator;
     }
 
@@ -1028,50 +1134,45 @@ function showHelpPanel() {
     }
     
     addTitle("基本操作：");
-    addContent("1. 选择要控制的图层");
-    addContent("2. 勾选需要添加的控制属性（旋转、缩放、不透明度）");
-    addContent("3. 点击\"开搞\"创建控制器及对应表达式");
+    addContent("1. 选择图层 → 2. 选择属性 → 3. 点击\"开搞\"");
+    addContent("复选框操作：左键切换 | 右键单选 | 双击面板全选");
+    addSeparator();
+    addTitle("主要功能：");
+    addContent("• 开搞：创建控制器和表达式（面板保持打开）");
+    addContent("• 层层空：为每个图层创建独立空对象（Ctrl+点击置顶）");
+    addContent("• 选择子级：选择当前图层的直接子级（Shift+保留选择）");
+    addContent("• 清除：右键\"取消\"切换，清除选中图层的表达式");
     addSeparator();
     addTitle("高级选项：");
-    addContent("- 总控制：右键点击激活。若勾选，会在基础控制器之上再添加一个总控制器");
-    addContent("- 子控制：右键点击激活。若勾选，会在基础控制器之上添加一个子控制器（若总控制也激活，则子控制在总控制之下）");
-    addContent("- 整体控制：");
-    addContent("  - 若未选中图层：点击会查找并选中所有无父级且未应用控制器表达式的图层");
-    addContent("  - 若已选中图层：点击会为选中的无父级图层创建一个共享的\"整体控制器\"");
+    addContent("• 总控制/子控制：右键激活，创建多层控制结构");
+    addContent("• 整体控制：为无父级图层创建共享控制器");
+    addContent("• 仅表达式：右键\"开搞\"切换，为有父级图层添加表达式");
     addSeparator();
-    addTitle("按钮功能：");
-    addContent("- 开搞 (左键)：根据上述选项创建控制器和表达式");
-    addContent("- 开搞 (右键)：切换到\"仅表达式\"模式。此模式下，左键点击\"仅表达式\"按钮，会为选中且已有父级的图层添加反向表达式");
-    addContent("- 取消 (左键)：关闭脚本窗口");
-    addContent("- 取消 (右键)：切换到\"清除\"模式。此模式下，左键点击\"清除\"按钮，会移除选中图层的控制器表达式和父子关系");
-    addContent("- ?：显示此帮助说明");
+    addTitle("使用技巧：");
+    addContent("• 全选属性：双击面板空白区域");
+    addContent("• 单选属性：右键点击对应复选框");
+    addContent("• 批量处理：选择多个图层后统一操作");
+    addContent("• 清除表达式：右键\"取消\"→点击\"清除\"");
     addSeparator();
     addTitle("相关链接：");
-    var descGroup = helpDialog.add("group");
-    descGroup.orientation = "column";
-    descGroup.alignChildren = "left";
-    descGroup.margins = [10, 4, 10, 0];
-    var descText = descGroup.add("statictext", undefined, "本脚本已在GitHub和Gitee开源。如果觉得好用，可以考虑在爱发电支持一下作者！", {multiline: true});
-    descText.graphics.font = ScriptUI.newFont("微软雅黑", ScriptUI.FontStyle.REGULAR, 12);
-    descText.graphics.foregroundColor = descText.graphics.newPen(descText.graphics.PenType.SOLID_COLOR, [0.9, 0.9, 0.9, 1], 1);
-    descText.preferredSize.width = 380;
+    addContent("本脚本已开源，觉得好用可以支持一下作者！");
 
-    var linksGroup = helpDialog.add("group");
+    var linksGroup = scrollPanel.add("group");
     linksGroup.orientation = "row";
-    linksGroup.alignChildren = ["left", "center"];
-    linksGroup.margins = [10, 2, 0, 4];
-    linksGroup.spacing = 10;
+    linksGroup.alignChildren = ["center", "center"];
+    linksGroup.margins = [0, 4, 0, 8];
+    linksGroup.spacing = 8;
 
     createLinkButton(linksGroup, "Bilibili", "₪", "https://space.bilibili.com/100881808");
     createLinkButton(linksGroup, "爱发电", "₪", "https://afdian.com/item/2c972f4608a411f09e8e52540025c377");
     createLinkButton(linksGroup, "Gitee", "₪", GITEE_URL);
     createLinkButton(linksGroup, "GitHub", "₪", GITHUB_URL);
 
-    addSeparator();
+    // 关闭按钮放在对话框底部
     var helpBtnGroup = helpDialog.add("group");
     helpBtnGroup.orientation = "row";
     helpBtnGroup.alignment = "center";
-    helpBtnGroup.margins = [0, 12, 0, 0];
+    helpBtnGroup.margins = [0, 8, 0, 0];
     helpBtnGroup.spacing = 8;
     var closeBtn = createStyledButton(helpBtnGroup, "关闭", [75, 28], true);
     closeBtn.onClick = function() {
@@ -1207,6 +1308,7 @@ optionsGroup.orientation = "column";
 optionsGroup.alignChildren = ["center", "center"];
 optionsGroup.margins = [12, 14, 12, 14];
 optionsGroup.spacing = 10;
+optionsGroup.helpTip = "选择要添加的控制属性\n双击空白区域：全选所有复选框";
 
 var checkboxGroup = optionsGroup.add("group");
 checkboxGroup.orientation = "row";
@@ -1217,9 +1319,84 @@ checkboxGroup.margins = [0, 2, 0, 2];
 var rotateCheck = createStyledCheckbox(checkboxGroup, "旋转");
 var scaleCheck = createStyledCheckbox(checkboxGroup, "缩放");
 var opacityCheck = createStyledCheckbox(checkboxGroup, "不透明度");
+
+// 添加工具提示
+rotateCheck.helpTip = "控制旋转属性\n右键点击：仅选择此项";
+scaleCheck.helpTip = "控制缩放属性\n右键点击：仅选择此项";
+opacityCheck.helpTip = "控制不透明度属性\n右键点击：仅选择此项";
 rotateCheck.value = true;
 scaleCheck.value = true;
 opacityCheck.value = true;
+
+// 添加复选框单选功能
+/**
+ * 设置单选模式：只选中指定的复选框，取消其他复选框
+ * @param {Checkbox} targetCheckbox 要选中的目标复选框
+ */
+function setSingleSelection(targetCheckbox) {
+    // 先取消所有复选框的选中状态
+    rotateCheck.value = false;
+    scaleCheck.value = false;
+    opacityCheck.value = false;
+
+    // 然后选中目标复选框
+    targetCheckbox.value = true;
+}
+
+// 为旋转复选框添加右击事件
+rotateCheck.addEventListener('mousedown', function(e) {
+    if (e.button == 2) { // 仅右键
+        setSingleSelection(rotateCheck);
+        e.preventDefault();
+    }
+});
+
+// 为缩放复选框添加右击事件
+scaleCheck.addEventListener('mousedown', function(e) {
+    if (e.button == 2) { // 仅右键
+        setSingleSelection(scaleCheck);
+        e.preventDefault();
+    }
+});
+
+// 为不透明度复选框添加右击事件
+opacityCheck.addEventListener('mousedown', function(e) {
+    if (e.button == 2) { // 仅右键
+        setSingleSelection(opacityCheck);
+        e.preventDefault();
+    }
+});
+
+// 添加面板双击全选功能
+/**
+ * 设置全选模式：选中所有复选框
+ */
+function setSelectAll() {
+    rotateCheck.value = true;
+    scaleCheck.value = true;
+    opacityCheck.value = true;
+}
+
+// 为optionsGroup面板添加双击事件监听器
+optionsGroup.addEventListener('mousedown', function(e) {
+    if (e.detail == 2) { // 双击事件
+        // 检查点击位置是否在复选框区域外
+        // 这里我们简单地检查是否点击了面板本身
+        setSelectAll();
+        e.preventDefault();
+    }
+});
+
+// 为checkboxGroup也添加双击事件（当点击复选框之间的空隙时）
+checkboxGroup.addEventListener('mousedown', function(e) {
+    if (e.detail == 2) { // 双击事件
+        // 检查是否点击的是空白区域而不是复选框本身
+        if (e.target === checkboxGroup) {
+            setSelectAll();
+            e.preventDefault();
+        }
+    }
+});
 
 // 添加新的控制组，用于放置总控制和子控制按钮
 var advancedControlGroup = optionsGroup.add("group");
@@ -1351,20 +1528,18 @@ cancelBtn.addEventListener('mousedown', function(e) {
         });
 
 mainBtn.onClick = function() {
-    var success = false;
     if (isExpressionMode) {
-        success = addExpressionsOnly();
+        addExpressionsOnly();
     } else {
-        success = createNullControl();
+        createNullControl();
     }
-    if (success) win.close();
+    // 不再自动关闭面板
 };
 
 cancelBtn.onClick = function() {
-    var success = false;
     if (isClearMode) {
-        success = clearNullControl();
-        if (success) win.close();
+        clearNullControl();
+        // 不再自动关闭面板
     } else {
         win.close();
     }
