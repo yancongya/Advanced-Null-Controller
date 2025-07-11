@@ -26,43 +26,37 @@ jobs:
     name: 同步分支
     runs-on: ubuntu-latest
     
-    # 确保只能在dev分支上运行
-    if: github.ref == 'refs/heads/dev'
-    
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # 获取完整历史记录
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: 配置Git用户
         run: |
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
-      
-      - name: 检查分支状态
+
+      - name: 检查分支状态并切换到dev分支
         run: |
-          echo "当前分支: $(git branch --show-current)"
+          echo "工作流触发分支: ${{ github.ref_name }}"
+          echo "切换到dev分支获取最新内容..."
+          git checkout dev
           echo "dev分支最新提交: $(git rev-parse HEAD)"
           git checkout main
           echo "main分支最新提交: $(git rev-parse HEAD)"
+      
+      - name: 从dev分支准备同步文件
+        run: |
+          echo "从dev分支准备同步的文件..."
+
+          # 切换到dev分支获取最新文件
           git checkout dev
-      
-      - name: 创建临时工作分支
-        run: |
-          # 创建临时分支用于同步操作
-          TEMP_BRANCH="temp-sync-$(date +%Y%m%d-%H%M%S)"
-          echo "TEMP_BRANCH=$TEMP_BRANCH" >> $GITHUB_ENV
-          git checkout -b $TEMP_BRANCH
-      
-      - name: 准备同步文件
-        run: |
-          echo "准备同步的文件列表..."
-          
+
           # 创建临时目录存储要同步的文件
           mkdir -p /tmp/sync-files
-          
+
           # 复制核心文件（排除assets/和dev/文件夹）
           # 复制.jsx脚本文件（如果在根目录）
           find . -maxdepth 1 -name "*.jsx" -type f | while read file; do
@@ -71,55 +65,60 @@ jobs:
               echo "已准备同步: $file"
             fi
           done
-          
+
           # 复制readme.md
           if [ -f "readme.md" ]; then
             cp "readme.md" "/tmp/sync-files/"
             echo "已准备同步: readme.md"
           fi
-          
-          # 复制.gitignore（main分支版本）
-          git checkout main
-          if [ -f ".gitignore" ]; then
-            cp ".gitignore" "/tmp/sync-files/"
-            echo "已准备同步: .gitignore (main分支版本)"
-          fi
-          git checkout $TEMP_BRANCH
-          
-          # 复制其他重要配置文件
-          for file in "*.json" "*.md" "*.txt" "*.yml" "*.yaml"; do
-            find . -maxdepth 1 -name "$file" -type f | while read f; do
-              if [ -f "$f" ] && [[ "$f" != "./readme.md" ]]; then
+
+          # 复制其他重要配置文件（从dev分支）
+          for pattern in "*.json" "*.txt" "*.yml" "*.yaml"; do
+            find . -maxdepth 1 -name "$pattern" -type f | while read f; do
+              if [ -f "$f" ] && [[ "$f" != "./readme.md" ]] && [[ "$f" != "./.github"* ]]; then
                 cp "$f" "/tmp/sync-files/"
                 echo "已准备同步: $f"
               fi
             done
           done
-          
+
           echo "同步文件准备完成"
-          ls -la /tmp/sync-files/
+          ls -la /tmp/sync-files/ || echo "没有文件需要同步"
       
       - name: 切换到main分支并应用更改
         run: |
           # 切换到main分支
           git checkout main
-          
+
           # 备份当前main分支状态
           git tag backup-main-$(date +%Y%m%d-%H%M%S)
-          
+
+          # 保留main分支的.gitignore文件
+          cp .gitignore /tmp/main-gitignore 2>/dev/null || echo "main分支没有.gitignore文件"
+
           # 复制准备好的文件到main分支
-          if [ -d "/tmp/sync-files" ]; then
-            cp -r /tmp/sync-files/* . 2>/dev/null || true
+          if [ -d "/tmp/sync-files" ] && [ "$(ls -A /tmp/sync-files 2>/dev/null)" ]; then
+            cp /tmp/sync-files/* . 2>/dev/null || true
+            echo "已复制同步文件到main分支"
+          else
+            echo "没有文件需要同步"
           fi
-          
+
+          # 恢复main分支的.gitignore文件
+          if [ -f "/tmp/main-gitignore" ]; then
+            cp /tmp/main-gitignore .gitignore
+            echo "已恢复main分支的.gitignore文件"
+          fi
+
           # 检查是否有更改
-          if git diff --quiet && git diff --cached --quiet; then
+          git add . 2>/dev/null || true
+          if git diff --cached --quiet; then
             echo "没有检测到需要同步的更改"
             echo "SYNC_NEEDED=false" >> $GITHUB_ENV
           else
             echo "检测到需要同步的更改"
             echo "SYNC_NEEDED=true" >> $GITHUB_ENV
-            git add .
+            git status --porcelain
           fi
       
       - name: 提交更改到main分支
@@ -149,19 +148,12 @@ jobs:
           git push origin main
           echo "已推送main分支更改到远程仓库"
       
-      - name: 清理临时分支
+      - name: 清理临时文件
         if: always()
         run: |
-          # 切换回dev分支
-          git checkout dev
-          
-          # 删除临时分支
-          if [ ! -z "$TEMP_BRANCH" ]; then
-            git branch -D $TEMP_BRANCH 2>/dev/null || true
-          fi
-          
           # 清理临时文件
-          rm -rf /tmp/sync-files
+          rm -rf /tmp/sync-files /tmp/main-gitignore 2>/dev/null || true
+          echo "临时文件清理完成"
       
       - name: 输出同步结果
         run: |
