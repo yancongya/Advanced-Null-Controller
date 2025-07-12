@@ -58,31 +58,60 @@ jobs:
           mkdir -p /tmp/sync-files
 
           # 复制核心文件（排除assets/和dev/文件夹）
+          echo "=== 同步根目录文件 ==="
+
           # 复制.jsx脚本文件（如果在根目录）
           find . -maxdepth 1 -name "*.jsx" -type f | while read file; do
             if [ -f "$file" ]; then
               cp "$file" "/tmp/sync-files/"
-              echo "已准备同步: $file"
+              echo "✅ 已准备同步: $file"
             fi
           done
 
           # 复制readme.md
           if [ -f "readme.md" ]; then
             cp "readme.md" "/tmp/sync-files/"
-            echo "已准备同步: readme.md"
+            echo "✅ 已准备同步: readme.md"
           fi
 
-          # 复制其他重要配置文件（从dev分支）
+          # 复制.drawio文件
+          find . -maxdepth 1 -name "*.drawio" -type f | while read file; do
+            if [ -f "$file" ]; then
+              cp "$file" "/tmp/sync-files/"
+              echo "✅ 已准备同步: $file"
+            fi
+          done
+
+          # 复制其他重要配置文件
           for pattern in "*.json" "*.txt" "*.yml" "*.yaml"; do
             find . -maxdepth 1 -name "$pattern" -type f | while read f; do
               if [ -f "$f" ] && [[ "$f" != "./readme.md" ]] && [[ "$f" != "./.github"* ]]; then
                 cp "$f" "/tmp/sync-files/"
-                echo "已准备同步: $f"
+                echo "✅ 已准备同步: $f"
               fi
             done
           done
 
-          echo "同步文件准备完成"
+          echo ""
+          echo "=== 同步重要文件夹 ==="
+
+          # 同步releases文件夹（编译后的脚本）
+          if [ -d "releases" ]; then
+            cp -r "releases" "/tmp/sync-files/"
+            echo "✅ 已准备同步: releases/ 文件夹"
+            ls -la releases/
+          fi
+
+          # 同步其他可能的重要文件夹（但排除assets和dev）
+          for folder in "docs" "scripts" "tools" "lib" "src"; do
+            if [ -d "$folder" ] && [ "$folder" != "assets" ] && [ "$folder" != "dev" ]; then
+              cp -r "$folder" "/tmp/sync-files/"
+              echo "✅ 已准备同步: $folder/ 文件夹"
+            fi
+          done
+
+          echo ""
+          echo "=== 同步文件准备完成 ==="
           ls -la /tmp/sync-files/ || echo "没有文件需要同步"
       
       - name: 切换到main分支并应用更改
