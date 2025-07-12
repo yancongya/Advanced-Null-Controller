@@ -9,17 +9,11 @@ on:
         required: false
         default: '同步dev分支的更改到main分支'
         type: string
-      force_sync:
-        description: '强制同步（忽略冲突警告）'
-        required: false
-        default: false
-        type: boolean
 
 # 权限配置
 permissions:
   contents: write
   actions: read
-  pull-requests: write
 
 jobs:
   sync-branches:
@@ -30,7 +24,7 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 获取完整历史记录
+          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 配置Git用户
@@ -38,181 +32,144 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
 
-      - name: 检查分支状态并切换到dev分支
+      - name: 执行分支同步
         run: |
+          echo "🚀 开始同步dev分支到main分支"
           echo "工作流触发分支: ${{ github.ref_name }}"
-          echo "切换到dev分支获取最新内容..."
-          git checkout dev
-          echo "dev分支最新提交: $(git rev-parse HEAD)"
-          git checkout main
-          echo "main分支最新提交: $(git rev-parse HEAD)"
-      
-      - name: 从dev分支准备同步文件
-        run: |
-          echo "从dev分支准备同步的文件..."
 
-          # 切换到dev分支获取最新文件
+          # 确保在main分支
+          git checkout main
+          echo "✅ 当前在main分支: $(git branch --show-current)"
+
+          # 创建备份标签
+          BACKUP_TAG="backup-main-$(date +%Y%m%d-%H%M%S)"
+          git tag $BACKUP_TAG
+          echo "✅ 创建备份标签: $BACKUP_TAG"
+
+          # 从dev分支合并，但排除特定文件夹
+          echo ""
+          echo "📂 开始从dev分支同步文件..."
+
+          # 切换到dev分支查看内容
           git checkout dev
-          echo "当前在分支: $(git branch --show-current)"
-          echo "当前目录内容:"
+          echo "dev分支内容:"
           ls -la
 
-          # 创建临时目录存储要同步的文件
-          mkdir -p /tmp/sync-files
-          echo "创建临时目录: /tmp/sync-files"
-
-          echo ""
-          echo "=== 检查dev分支文件 ==="
-          echo "releases文件夹存在: $([ -d 'releases' ] && echo 'YES' || echo 'NO')"
-          if [ -d "releases" ]; then
-            echo "releases文件夹内容:"
-            ls -la releases/
-          fi
-
-          echo ""
-          echo "=== 开始文件复制 ==="
-
-          # 复制readme.md
-          if [ -f "readme.md" ]; then
-            cp "readme.md" "/tmp/sync-files/"
-            echo "✅ 已复制: readme.md"
-          else
-            echo "❌ 未找到: readme.md"
-          fi
-
-          # 复制.drawio文件
-          for file in *.drawio; do
-            if [ -f "$file" ]; then
-              cp "$file" "/tmp/sync-files/"
-              echo "✅ 已复制: $file"
-            fi
-          done
-
-          # 复制releases文件夹
-          if [ -d "releases" ]; then
-            echo "开始复制releases文件夹..."
-            cp -r "releases" "/tmp/sync-files/"
-            echo "✅ 已复制: releases/ 文件夹"
-            echo "验证复制结果:"
-            ls -la "/tmp/sync-files/releases/" || echo "复制失败"
-          else
-            echo "❌ releases文件夹不存在"
-          fi
-
-          # 复制其他重要文件夹
-          for folder in "docs" "scripts" "tools" "lib" "src"; do
-            if [ -d "$folder" ]; then
-              cp -r "$folder" "/tmp/sync-files/"
-              echo "✅ 已复制: $folder/ 文件夹"
-            fi
-          done
-
-          echo ""
-          echo "=== 最终同步文件列表 ==="
-          echo "临时目录内容:"
-          ls -la /tmp/sync-files/ || echo "临时目录为空"
-
-          echo ""
-          echo "文件总数统计:"
-          find /tmp/sync-files -type f | wc -l || echo "0"
-      
-      - name: 切换到main分支并应用更改
-        run: |
-          # 切换到main分支
+          # 使用git checkout选择性合并文件
           git checkout main
 
-          # 备份当前main分支状态
-          git tag backup-main-$(date +%Y%m%d-%H%M%S)
+          # 逐个同步文件和文件夹（排除assets和dev文件夹）
+          git checkout dev -- . 2>/dev/null || true
 
-          # 保留main分支的.gitignore文件
-          cp .gitignore /tmp/main-gitignore 2>/dev/null || echo "main分支没有.gitignore文件"
-
-          # 复制准备好的文件到main分支
-          if [ -d "/tmp/sync-files" ] && [ "$(ls -A /tmp/sync-files 2>/dev/null)" ]; then
-            cp /tmp/sync-files/* . 2>/dev/null || true
-            echo "已复制同步文件到main分支"
-          else
-            echo "没有文件需要同步"
+          # 删除不需要的文件夹
+          if [ -d "assets" ]; then
+            rm -rf assets
+            echo "❌ 已排除: assets/ 文件夹"
           fi
 
-          # 恢复main分支的.gitignore文件
-          if [ -f "/tmp/main-gitignore" ]; then
-            cp /tmp/main-gitignore .gitignore
-            echo "已恢复main分支的.gitignore文件"
+          if [ -d "dev" ]; then
+            rm -rf dev
+            echo "❌ 已排除: dev/ 文件夹"
           fi
+
+          # 恢复main分支的.gitignore
+          git checkout HEAD -- .gitignore 2>/dev/null || true
+          echo "✅ 保留main分支的.gitignore配置"
+
+          echo ""
+          echo "📋 同步后的main分支内容:"
+          ls -la
+      
+      - name: 检查更改并提交
+        run: |
+          echo ""
+          echo "🔍 检查是否有更改需要提交..."
+
+          # 添加所有更改
+          git add .
 
           # 检查是否有更改
-          git add . 2>/dev/null || true
           if git diff --cached --quiet; then
-            echo "没有检测到需要同步的更改"
-            echo "SYNC_NEEDED=false" >> $GITHUB_ENV
+            echo "ℹ️ 没有检测到需要同步的更改"
+            echo "HAS_CHANGES=false" >> $GITHUB_ENV
           else
-            echo "检测到需要同步的更改"
-            echo "SYNC_NEEDED=true" >> $GITHUB_ENV
+            echo "✅ 检测到需要同步的更改:"
             git status --porcelain
+            echo "HAS_CHANGES=true" >> $GITHUB_ENV
           fi
-      
-      - name: 提交更改到main分支
-        if: env.SYNC_NEEDED == 'true'
+
+      - name: 提交并推送更改
+        if: env.HAS_CHANGES == 'true'
         run: |
+          echo "📝 提交更改到main分支..."
+
           # 使用自定义提交消息或默认消息
           COMMIT_MSG="${{ github.event.inputs.commit_message }}"
           if [ -z "$COMMIT_MSG" ]; then
             COMMIT_MSG="同步dev分支的更改到main分支"
           fi
-          
-          # 添加同步信息到提交消息
+
+          # 创建详细的提交消息
           FULL_MSG="$COMMIT_MSG
 
-          同步信息:
-          - 源分支: dev
+          🔄 同步信息:
+          - 源分支: dev → main
           - 同步时间: $(date -u '+%Y-%m-%d %H:%M:%S UTC')
           - 触发者: ${{ github.actor }}
-          - 工作流运行: ${{ github.run_id }}"
-          
+          - 排除文件夹: assets/, dev/
+          - 工作流: ${{ github.run_id }}"
+
+          # 提交更改
           git commit -m "$FULL_MSG"
-          echo "已提交更改到main分支"
-      
-      - name: 推送main分支更改
-        if: env.SYNC_NEEDED == 'true'
-        run: |
+          echo "✅ 已提交更改到main分支"
+
+          # 推送到远程仓库
+          echo "📤 推送更改到远程仓库..."
           git push origin main
-          echo "已推送main分支更改到远程仓库"
-      
-      - name: 清理临时文件
+          echo "✅ 已推送main分支更改到远程仓库"
+
+      - name: 输出同步结果
         if: always()
         run: |
-          # 清理临时文件
-          rm -rf /tmp/sync-files /tmp/main-gitignore 2>/dev/null || true
-          echo "临时文件清理完成"
-      
-      - name: 输出同步结果
-        run: |
-          if [ "$SYNC_NEEDED" == "true" ]; then
-            echo "✅ 同步完成！dev分支的更改已成功同步到main分支"
+          echo ""
+          echo "🎉 同步操作完成！"
+          echo "================================"
+
+          if [ "$HAS_CHANGES" == "true" ]; then
+            echo "✅ 同步成功！dev分支的更改已同步到main分支"
             echo "📝 提交消息: ${{ github.event.inputs.commit_message }}"
             echo "🔗 查看main分支: https://github.com/${{ github.repository }}/tree/main"
           else
-            echo "ℹ️ 没有需要同步的更改"
+            echo "ℹ️ 没有需要同步的更改，两个分支已保持同步"
           fi
-          
-          echo "🌿 当前分支状态:"
-          git checkout main
+
+          echo ""
+          echo "📊 分支状态总结:"
+          git checkout main 2>/dev/null || true
           echo "main分支最新提交: $(git log -1 --oneline)"
-          git checkout dev
-          echo "dev分支最新提交: $(git log -1 --oneline)"
-      
+          echo "main分支文件列表:"
+          ls -la
+
+          echo ""
+          echo "🎯 同步策略:"
+          echo "- ✅ 已同步: 除assets/和dev/文件夹外的所有内容"
+          echo "- ❌ 已排除: assets/ 文件夹（设计资源）"
+          echo "- ❌ 已排除: dev/ 文件夹（开发文件）"
+          echo "- ✅ 已保留: main分支的.gitignore配置"
+
       - name: 错误处理
         if: failure()
         run: |
+          echo ""
           echo "❌ 同步过程中发生错误"
-          echo "请检查工作流日志以获取详细信息"
-          echo "如果遇到合并冲突，请手动解决后重新运行工作流"
-          
-          # 尝试恢复到安全状态
-          git checkout dev 2>/dev/null || true
-          
-          # 清理可能的临时分支
-          if [ ! -z "$TEMP_BRANCH" ]; then
-            git branch -D $TEMP_BRANCH 2>/dev/null || true
-          fi
+          echo "================================"
+          echo "请检查上方的工作流日志以获取详细错误信息"
+          echo ""
+          echo "💡 常见解决方案:"
+          echo "1. 检查dev分支是否有最新的更改"
+          echo "2. 确认没有文件权限问题"
+          echo "3. 重新运行工作流"
+          echo "4. 如有持续问题，请检查仓库设置"
+
+          # 确保回到安全状态
+          git checkout main 2>/dev/null || true
