@@ -53,66 +53,68 @@ jobs:
 
           # 切换到dev分支获取最新文件
           git checkout dev
+          echo "当前在分支: $(git branch --show-current)"
+          echo "当前目录内容:"
+          ls -la
 
           # 创建临时目录存储要同步的文件
           mkdir -p /tmp/sync-files
+          echo "创建临时目录: /tmp/sync-files"
 
-          # 复制核心文件（排除assets/和dev/文件夹）
-          echo "=== 同步根目录文件 ==="
+          echo ""
+          echo "=== 检查dev分支文件 ==="
+          echo "releases文件夹存在: $([ -d 'releases' ] && echo 'YES' || echo 'NO')"
+          if [ -d "releases" ]; then
+            echo "releases文件夹内容:"
+            ls -la releases/
+          fi
 
-          # 复制.jsx脚本文件（如果在根目录）
-          find . -maxdepth 1 -name "*.jsx" -type f | while read file; do
-            if [ -f "$file" ]; then
-              cp "$file" "/tmp/sync-files/"
-              echo "✅ 已准备同步: $file"
-            fi
-          done
+          echo ""
+          echo "=== 开始文件复制 ==="
 
           # 复制readme.md
           if [ -f "readme.md" ]; then
             cp "readme.md" "/tmp/sync-files/"
-            echo "✅ 已准备同步: readme.md"
+            echo "✅ 已复制: readme.md"
+          else
+            echo "❌ 未找到: readme.md"
           fi
 
           # 复制.drawio文件
-          find . -maxdepth 1 -name "*.drawio" -type f | while read file; do
+          for file in *.drawio; do
             if [ -f "$file" ]; then
               cp "$file" "/tmp/sync-files/"
-              echo "✅ 已准备同步: $file"
+              echo "✅ 已复制: $file"
             fi
           done
 
-          # 复制其他重要配置文件
-          for pattern in "*.json" "*.txt" "*.yml" "*.yaml"; do
-            find . -maxdepth 1 -name "$pattern" -type f | while read f; do
-              if [ -f "$f" ] && [[ "$f" != "./readme.md" ]] && [[ "$f" != "./.github"* ]]; then
-                cp "$f" "/tmp/sync-files/"
-                echo "✅ 已准备同步: $f"
-              fi
-            done
-          done
-
-          echo ""
-          echo "=== 同步重要文件夹 ==="
-
-          # 同步releases文件夹（编译后的脚本）
+          # 复制releases文件夹
           if [ -d "releases" ]; then
+            echo "开始复制releases文件夹..."
             cp -r "releases" "/tmp/sync-files/"
-            echo "✅ 已准备同步: releases/ 文件夹"
-            ls -la releases/
+            echo "✅ 已复制: releases/ 文件夹"
+            echo "验证复制结果:"
+            ls -la "/tmp/sync-files/releases/" || echo "复制失败"
+          else
+            echo "❌ releases文件夹不存在"
           fi
 
-          # 同步其他可能的重要文件夹（但排除assets和dev）
+          # 复制其他重要文件夹
           for folder in "docs" "scripts" "tools" "lib" "src"; do
-            if [ -d "$folder" ] && [ "$folder" != "assets" ] && [ "$folder" != "dev" ]; then
+            if [ -d "$folder" ]; then
               cp -r "$folder" "/tmp/sync-files/"
-              echo "✅ 已准备同步: $folder/ 文件夹"
+              echo "✅ 已复制: $folder/ 文件夹"
             fi
           done
 
           echo ""
-          echo "=== 同步文件准备完成 ==="
-          ls -la /tmp/sync-files/ || echo "没有文件需要同步"
+          echo "=== 最终同步文件列表 ==="
+          echo "临时目录内容:"
+          ls -la /tmp/sync-files/ || echo "临时目录为空"
+
+          echo ""
+          echo "文件总数统计:"
+          find /tmp/sync-files -type f | wc -l || echo "0"
       
       - name: 切换到main分支并应用更改
         run: |
