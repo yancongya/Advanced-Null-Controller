@@ -1,0 +1,190 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.16 Chrome/132.0.6834.196 Electron/34.2.0 Safari/537.36" version="26.0.16">
+  <diagram id="advanced-null-controller-v21-clean" name="Advanced Null Controller v2.1 工作流程">
+    <mxGraphModel dx="1199" dy="707" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="2000" background="#2E2E2E" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Advanced Null Controller v2.1 - 完整工作流程" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;shadow=1;align=center;fillColor=#1A5276;strokeColor=#A9CCE3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="400" y="20" width="800" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="start" value="启动脚本" style="ellipse;whiteSpace=wrap;html=1;fontSize=14;fontStyle=1;fillColor=#4A235A;strokeColor=#D2B4DE;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="750" y="120" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_init" value="初始化UI面板" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#7D6608;strokeColor=#FDEBD0;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="730" y="220" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="user_interaction" value="用户交互" style="rhombus;whiteSpace=wrap;html=1;fontSize=12;fillColor=#1A5276;strokeColor=#A9CCE3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="750" y="300" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="main_function" value="核心功能" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="400" y="400" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="advanced_tools" value="高级工具" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="750" y="400" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="help_function" value="帮助功能" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#784212;strokeColor=#EDBB99;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="940" y="400" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="create_mode" value="创建控制器模式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="200" y="500" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="expression_mode" value="仅表达式模式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="390" y="500" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_mode" value="清除控制器模式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#922B21;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="530" y="500" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="layered_nulls" value="层层空功能" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="670" y="500" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="select_children" value="选择子级功能" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="790" y="500" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="global_control" value="整体控制功能" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="910" y="500" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="create_detail_title" value="创建控制器模式详细流程" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#A3E4D7;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="50" y="580" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step1" value="1. 检查活动合成" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="50" y="610" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step2" value="2. 验证选中图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="170" y="610" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step3" value="3. 处理锁定图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="50" y="660" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step4" value="4. 筛选无父级图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="170" y="660" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step5" value="5. 计算中心位置" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="50" y="710" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step6" value="6. 创建控制器" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="170" y="710" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step7" value="7. 建立层级关系" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="50" y="760" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="create_step8" value="8. 应用表达式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#0E6655;strokeColor=#A3E4D7;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="170" y="760" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_detail_title" value="仅表达式模式详细流程" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#85C1E9;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="350" y="580" width="180" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step1" value="1. 检查活动合成" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="350" y="610" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step2" value="2. 检查选中图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="470" y="610" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step3" value="3. 检查选中属性" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="350" y="660" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step4" value="4. 遍历图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="470" y="660" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step5" value="5. 添加旋转表达式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="350" y="710" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step6" value="6. 添加缩放表达式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="470" y="710" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step7" value="7. 添加不透明度表达式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#1B4F72;strokeColor=#85C1E9;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="350" y="760" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="expr_step8" value="8. 错误处理" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#E74C3C;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="470" y="760" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_detail_title" value="清除控制器模式详细流程" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#F1948A;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="650" y="580" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_step1" value="1. 检查活动合成" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#922B21;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="650" y="610" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_step2" value="2. 检查选中图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#922B21;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="770" y="610" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_step3" value="3. 遍历图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#922B21;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="650" y="660" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_step4" value="4. 清除所有表达式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#922B21;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="770" y="660" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_step5" value="5. 忽略错误继续" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#D68910;strokeColor=#F7DC6F;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="650" y="710" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="clear_step6" value="6. 清除完成" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;fillColor=#922B21;strokeColor=#F1948A;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="770" y="710" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="advanced_detail_title" value="高级工具详细流程" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#C39BD3;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="900" y="580" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="layered_detail" value="层层空：为每个图层创建独立父级空对象" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="900" y="610" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="select_detail" value="选择子级：智能查找并选择子级图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="900" y="670" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="global_detail" value="整体控制：创建共享控制器或查找未控图层" style="rounded=1;whiteSpace=wrap;html=1;fontSize=9;fillColor=#6C3483;strokeColor=#C39BD3;fontColor=#FFFFFF;" parent="1" vertex="1">
+          <mxGeometry x="900" y="730" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="edge1" style="strokeColor=#D2B4DE;" parent="1" source="start" target="ui_init" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" style="strokeColor=#FDEBD0;" parent="1" source="ui_init" target="user_interaction" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" style="strokeColor=#A9CCE3;" parent="1" source="user_interaction" target="main_function" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" style="strokeColor=#A9CCE3;" parent="1" source="user_interaction" target="advanced_tools" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" style="strokeColor=#A9CCE3;" parent="1" source="user_interaction" target="help_function" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" style="strokeColor=#A3E4D7;" parent="1" source="main_function" target="create_mode" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" style="strokeColor=#85C1E9;" parent="1" source="main_function" target="expression_mode" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" style="strokeColor=#F1948A;" parent="1" source="main_function" target="clear_mode" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge9" style="strokeColor=#C39BD3;" parent="1" source="advanced_tools" target="layered_nulls" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge10" style="strokeColor=#C39BD3;" parent="1" source="advanced_tools" target="select_children" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge11" style="strokeColor=#C39BD3;" parent="1" source="advanced_tools" target="global_control" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="features_title" value="关键特性说明" style="rounded=1;whiteSpace=wrap;html=1;fontSize=16;fontStyle=1;strokeColor=#F7DC6F;fillColor=#F4D03F;fontColor=#000000;align=center;" parent="1" vertex="1">
+          <mxGeometry x="50" y="820" width="1040" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="feature_create" value="🔧 创建控制器模式特性：&#xa;• 支持总控制和子控制的多层级结构&#xa;• 自动处理锁定图层（临时解锁后恢复）&#xa;• 智能筛选无父级图层&#xa;• 计算图层中心位置创建控制器&#xa;• 自动建立层级关系和绑定图层&#xa;• 应用反向控制表达式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;strokeColor=#A3E4D7;fillColor=#E8F8F5;fontColor=#000000;align=left;" parent="1" vertex="1">
+          <mxGeometry x="50" y="880" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="feature_expression" value="📝 仅表达式模式特性：&#xa;• 直接设置表达式，无复杂检查&#xa;• 支持旋转、缩放、不透明度三种表达式&#xa;• 使用try-catch处理每个表达式错误&#xa;• 不检查父级关系，允许预设表达式&#xa;• 表达式在有父级时自动生效&#xa;• 简化的成功逻辑，提高稳定性" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;strokeColor=#85C1E9;fillColor=#EBF5FB;fontColor=#000000;align=left;" parent="1" vertex="1">
+          <mxGeometry x="320" y="880" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="feature_clear" value="🗑️ 清除控制器模式特性：&#xa;• 直接清除所有表达式&#xa;• 忽略错误继续清除过程&#xa;• 不中断清除操作&#xa;• 简单高效的清除逻辑&#xa;• 支持批量清除多个图层&#xa;• 恢复图层原始状态" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;strokeColor=#F1948A;fillColor=#FDEDEC;fontColor=#000000;align=left;" parent="1" vertex="1">
+          <mxGeometry x="590" y="880" width="250" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="feature_advanced" value="⚡ 高级工具特性：&#xa;• 层层空：为每个图层创建独立父级空对象&#xa;• 选择子级：智能查找并选择子级图层&#xa;• 整体控制：创建共享控制器或查找未控图层&#xa;• 支持Ctrl/Shift修饰键功能&#xa;• 自动处理图层排序和关系&#xa;• 灵活的选择和控制模式" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;strokeColor=#C39BD3;fillColor=#F4ECF7;fontColor=#000000;align=left;" parent="1" vertex="1">
+          <mxGeometry x="860" y="880" width="230" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="expressions_detail" value="📋 表达式详细内容：&#xa;• 旋转表达式：value - parent.transform.rotation&#xa;• 缩放表达式：复杂的父级缩放计算逻辑&#xa;• 不透明度表达式：hasParent?parent.transform.opacity*parent.enabled:value&#xa;• 所有表达式都支持无父级情况&#xa;• 自动适配2D/3D图层&#xa;• 完善的错误处理机制" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;strokeColor=#F7DC6F;fillColor=#FFFBF0;fontColor=#000000;align=left;" parent="1" vertex="1">
+          <mxGeometry x="50" y="1020" width="380" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="technical_notes" value="🔍 技术要点：&#xa;• 修复后的表达式添加逻辑恢复到最初版本的简单可靠实现&#xa;• 移除了复杂的canSetExpression检查，直接尝试设置表达式&#xa;• 使用try-catch确保每个表达式设置的稳定性&#xa;• 成功解决了&#39;未能为任何图层添加表达式&#39;的问题&#xa;• 保持向后兼容性，支持各种图层类型" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;strokeColor=#D5A6BD;fillColor=#F2E9F1;fontColor=#000000;align=left;" parent="1" vertex="1">
+          <mxGeometry x="460" y="1020" width="630" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
